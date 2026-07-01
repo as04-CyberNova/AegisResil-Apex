@@ -113,20 +113,6 @@ Navigate to **[http://localhost:3000](http://localhost:3000)**
 
 ---
 
-## ☁️ Deploying to Render
-
-1. Push your repo to GitHub
-2. Go to [render.com](https://render.com) → **New Web Service**
-3. Connect your `CareerShield-AI` repo
-4. Settings:
-   - **Build Command**: `npm install`
-   - **Start Command**: `npm start`
-   - **Instance Type**: Free
-5. Add all your `.env` variables under **Environment**
-6. Click **Deploy** — Render gives you a live URL
-7. Add your Render domain to **Firebase Console → Authentication → Authorized Domains**
-
----
 
 ## 🔒 Security Architecture
 
