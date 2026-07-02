@@ -1485,10 +1485,34 @@ select.textarea-input {
     grid-template-columns: 1fr;
   }
 
-  /* Stats → 2 columns on mobile */
+  /* Stats → auto-wrap columns based on width, prevent overflow */
   .stats-grid {
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 0.85rem;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .stat-card {
+    padding: 1rem !important;
+    gap: 0.75rem;
+  }
+
+  .stat-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+  }
+
+  .stat-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .stat-value {
+    font-size: 1.3rem;
+  }
+
+  .stat-label {
+    font-size: 0.72rem;
   }
 
   .charts-grid {
@@ -1516,7 +1540,7 @@ select.textarea-input {
   }
 
   .card {
-    padding: 1.25rem;
+    padding: 1rem;
     border-radius: 12px;
   }
 
@@ -1525,16 +1549,32 @@ select.textarea-input {
   }
 
   .stats-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 0.6rem;
+  }
+
+  .stat-card {
+    padding: 0.85rem !important;
+    gap: 0.6rem;
+  }
+
+  .stat-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+  }
+
+  .stat-icon svg {
+    width: 16px;
+    height: 16px;
   }
 
   .stat-value {
-    font-size: 1.4rem;
+    font-size: 1.2rem;
   }
 
   .stat-label {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
   }
 
   .gauge-number {
