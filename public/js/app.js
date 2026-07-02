@@ -13,39 +13,39 @@ document.addEventListener('DOMContentLoaded', () => {
   // Page titles and descriptions map
   const viewMeta = {
     dashboard: {
-      title: 'Dashboard Overview',
+      title: 'Dashboard <em>Overview</em>',
       desc: 'Monitor security checks and resume optimization history.'
     },
     analyzer: {
-      title: 'Scam & Fraud Message Analyzer',
+      title: 'Scam & Fraud <em>Message Analyzer</em>',
       desc: 'Verify job offers, recruiter emails, and messages for red flags.'
     },
     scorer: {
-      title: 'ATS Resume Scorer',
+      title: 'ATS <em>Resume Scorer</em>',
       desc: 'Evaluate formatting readability, identify missing keywords, and get optimizations.'
     },
     trust: {
-      title: 'Company Trust Analyzer',
+      title: 'Company <em>Trust Analyzer</em>',
       desc: 'Verify if a company matches known hiring fraud profiles and check public signals.'
     },
     roadmap: {
-      title: 'Career Roadmap Generator',
+      title: 'Career <em>Roadmap Generator</em>',
       desc: 'Get a step-by-step monthly study curriculum for your target career role.'
     },
     match: {
-      title: 'Internship Match Score',
+      title: 'Internship <em>Match Score</em>',
       desc: 'Evaluate how well your resume matches target internship criteria.'
     },
     interview: {
-      title: 'Interview Preparation',
+      title: 'Interview <em>Preparation</em>',
       desc: 'Generate role-based practice questions and grade your answers in real-time.'
     },
     coverletter: {
-      title: 'Outreach & Cover Letter Generator',
+      title: 'Outreach & <em>Cover Letter</em> Generator',
       desc: 'Generate scannable cold application messages or formal cover letters matching job descriptions.'
     },
     profile: {
-      title: 'LinkedIn Profile Optimizer',
+      title: 'LinkedIn <em>Profile Optimizer</em>',
       desc: 'Optimize your LinkedIn headlines and About summary layouts to attract entry-level recruiters.'
     }
   };
@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 3. Update title and descriptions
     if (viewMeta[tabId]) {
-      viewTitle.textContent = viewMeta[tabId].title;
+      viewTitle.innerHTML = viewMeta[tabId].title;
       viewDesc.textContent = viewMeta[tabId].desc;
     }
 
@@ -401,6 +401,29 @@ document.addEventListener('DOMContentLoaded', () => {
       toggleSidebar(true);
     }
   }, { passive: true });
+
+  // --- CURSOR GLOW SPOTLIGHT TRACKING ---
+  const cursorGlow = document.getElementById('cursor-glow');
+  if (cursorGlow) {
+    let mouseX = 0, mouseY = 0;
+    let currentX = 0, currentY = 0;
+
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    }, { passive: true });
+
+    function animateCursor() {
+      const dx = mouseX - currentX;
+      const dy = mouseY - currentY;
+      currentX += dx * 0.12;
+      currentY += dy * 0.12;
+
+      cursorGlow.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) translate(-50%, -50%)`;
+      requestAnimationFrame(animateCursor);
+    }
+    animateCursor();
+  }
 
   // Initialize Page Coordinator
   checkServerStatus();

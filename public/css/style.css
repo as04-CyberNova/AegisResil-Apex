@@ -1,10 +1,9 @@
 /* 
- * CareerShield AI — Premium UI Styling
- * v2.0 — Performance, Smooth Scroll & Full Responsiveness Edition
- * Optimizations: GPU compositing, specific transitions, mobile-first responsive, hamburger drawer
+ * CareerShield AI — Premium UI Styling (Redesign Reference Style)
+ * Performance, Smooth Scroll & Full Responsiveness Overhaul
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@1,9..144,300..900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 /* ============================================================
    DESIGN VARIABLES
@@ -12,52 +11,71 @@
 :root {
   --font-header: 'Outfit', sans-serif;
   --font-body: 'Inter', sans-serif;
+  --font-accent: 'Fraunces', Georgia, serif;
+  --font-mono: 'JetBrains Mono', monospace;
 
-  /* Color Palette */
-  --bg-dark: #0a0d16;
-  --bg-dark-rgb: 10, 13, 22;
-  --bg-card: rgba(16, 22, 42, 0.6);
-  --bg-card-hover: rgba(24, 33, 62, 0.85);
+  /* Color Palette (Portfolio Style) */
+  --bg-dark: #0B1220;
+  --bg-dark-rgb: 11, 18, 32;
+  --bg-card: rgba(30, 41, 59, 0.45);
+  --bg-card-hover: rgba(30, 41, 59, 0.7);
+  
+  --border-light: rgba(148, 163, 184, 0.12);
+  --border-glow: rgba(56, 189, 248, 0.25);
 
-  --border-light: rgba(255, 255, 255, 0.08);
-  --border-glow: rgba(0, 242, 254, 0.2);
-
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
 
   /* Accents */
-  --primary: #00f2fe;
-  --primary-rgb: 0, 242, 254;
-  --secondary: #4facfe;
-  --secondary-rgb: 79, 172, 254;
+  --primary: #38BDF8;
+  --primary-rgb: 56, 189, 248;
+  --secondary: #06B6D4;
+  --secondary-rgb: 6, 182, 212;
 
   /* Status Colors */
-  --color-safe: #10b981;
-  --color-safe-bg: rgba(16, 185, 129, 0.1);
-  --color-safe-border: rgba(16, 185, 129, 0.25);
+  --color-safe: #22C55E;
+  --color-safe-bg: rgba(34, 197, 94, 0.08);
+  --color-safe-border: rgba(34, 197, 94, 0.2);
 
-  --color-warning: #f59e0b;
-  --color-warning-bg: rgba(245, 158, 11, 0.1);
-  --color-warning-border: rgba(245, 158, 11, 0.25);
+  --color-warning: #F59E0B;
+  --color-warning-bg: rgba(245, 158, 11, 0.08);
+  --color-warning-border: rgba(245, 158, 11, 0.2);
 
-  --color-danger: #ef4444;
-  --color-danger-bg: rgba(239, 68, 68, 0.1);
-  --color-danger-border: rgba(239, 68, 68, 0.25);
+  --color-danger: #EF4444;
+  --color-danger-bg: rgba(239, 68, 68, 0.08);
+  --color-danger-border: rgba(239, 68, 68, 0.2);
 
-  /* ⚡ Performance: Use specific properties instead of 'all' to avoid animating every CSS property */
-  --transition-fast: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition: 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Transitions & Shadows */
+  --transition-fast: 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-slow: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 
-  --shadow-lg: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
-  --glow-shadow: 0 0 20px rgba(0, 242, 254, 0.15);
+  --shadow-lg: 0 10px 30px -10px rgba(0, 0, 0, 0.6);
+  --glow-shadow: 0 0 25px rgba(56, 189, 248, 0.25);
 
   /* Layout */
   --sidebar-width: 280px;
   --sidebar-z: 100;
   --overlay-z: 99;
   --modal-z: 2000;
+}
+
+/* ============================================================
+   DYNAMIC CURSOR GLOW
+   ============================================================ */
+.cursor-glow {
+  position: fixed;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.075) 0%, rgba(6, 182, 212, 0.02) 45%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  will-change: transform;
+  left: 0;
+  top: 0;
 }
 
 /* ============================================================
@@ -79,20 +97,32 @@ body {
   font-family: var(--font-body);
   background-color: var(--bg-dark);
   background-image:
-    radial-gradient(circle at 10% 20%, rgba(79, 172, 254, 0.05) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(0, 242, 254, 0.04) 0%, transparent 40%);
+    radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.04) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.03) 0%, transparent 40%);
   background-attachment: fixed;
   color: var(--text-primary);
   min-height: 100vh;
   min-height: 100dvh; /* Modern mobile: excludes browser chrome */
   display: flex;
   overflow-x: hidden;
+  position: relative;
 }
 
 h1, h2, h3, h4 {
   font-family: var(--font-header);
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
+}
+
+h1 em, h2 em, h3 em, h4 em, .editorial-accent {
+  font-family: var(--font-accent);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--primary);
+}
+
+.stat-value, .gauge-number, .history-badge, .timeline-indicator, .score-number, .badge-level {
+  font-family: var(--font-mono);
 }
 
 /* ============================================================
