@@ -125,6 +125,23 @@ h1 em, h2 em, h3 em, h4 em, .editorial-accent {
   font-family: var(--font-mono);
 }
 
+/* Custom Global Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-light);
+  border-radius: 100px;
+  border: 1px solid var(--bg-dark);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
 /* ============================================================
    HAMBURGER BUTTON (mobile only)
    ============================================================ */
@@ -647,37 +664,54 @@ body.sidebar-open .sidebar-overlay {
   align-items: center;
   justify-content: center;
   gap: 0.65rem;
-  padding: 0.82rem 1.6rem;
+  padding: 0.85rem 1.6rem;
   font-family: var(--font-body);
-  font-size: 0.92rem;
-  font-weight: 600;
-  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border-radius: 8px;
   cursor: pointer;
   outline: none;
   transition:
     transform var(--transition-fast),
     box-shadow var(--transition-fast),
     background var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
     opacity var(--transition-fast);
   will-change: transform;
   white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  min-height: 44px;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  color: #0b0f19;
-  border: none;
-  box-shadow: 0 4px 18px rgba(0, 242, 254, 0.25);
+  background: var(--primary);
+  color: #000000;
+  border: 1.5px solid var(--primary);
 }
 
 .btn-primary:hover:not(:disabled) {
+  background: transparent;
+  color: var(--primary) !important;
   transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(0, 242, 254, 0.38);
+  box-shadow: var(--glow-shadow);
 }
 
 .btn-primary:active:not(:disabled) {
   transform: translateY(0);
-  box-shadow: 0 2px 12px rgba(0, 242, 254, 0.2);
+}
+
+.btn-secondary, .btn:not(.btn-primary) {
+  background: rgba(255, 255, 255, 0.02);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.btn-secondary:hover:not(:disabled), .btn:not(.btn-primary):hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  transform: translateY(-2px);
 }
 
 .btn:disabled {
