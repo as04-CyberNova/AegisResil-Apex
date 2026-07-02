@@ -1533,6 +1533,9 @@ select.textarea-input {
   /* App grid — full width, single column */
   .app-container {
     grid-template-columns: 1fr;
+    min-width: 0;
+    width: 100%;
+    overflow-x: hidden;
   }
 
   /* Main content — full width with top padding for hamburger btn */
@@ -1542,6 +1545,9 @@ select.textarea-input {
     min-height: 100vh;
     min-height: 100dvh;
     overflow-y: visible;
+    min-width: 0;
+    width: 100%;
+    overflow-x: hidden;
   }
 
   /* Results grid → single column */
@@ -1603,6 +1609,9 @@ select.textarea-input {
 @media (max-width: 480px) {
   .main-content {
     padding: 4.5rem 1rem 2rem;
+    min-width: 0;
+    width: 100%;
+    overflow-x: hidden;
   }
 
   .card {
