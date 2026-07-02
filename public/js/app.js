@@ -363,8 +363,48 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // --- MOBILE HAMBURGER MENU & DRAWER NAVIGATION ---
+  const hamburgerBtn = document.getElementById('hamburger-btn');
+  const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+  function toggleSidebar(forceClose = false) {
+    if (forceClose) {
+      document.body.classList.remove('sidebar-open');
+    } else {
+      document.body.classList.toggle('sidebar-open');
+    }
+  }
+
+  if (hamburgerBtn) {
+    hamburgerBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleSidebar();
+    });
+  }
+
+  if (sidebarOverlay) {
+    sidebarOverlay.addEventListener('click', () => {
+      toggleSidebar(true);
+    });
+  }
+
+  // Intercept nav clicks to auto-close drawer on mobile
+  navItems.forEach(item => {
+    item.addEventListener('click', () => {
+      toggleSidebar(true);
+    });
+  });
+
+  // Handle window resizing to clean up sidebar state when transitioning to desktop/tablet views
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+      toggleSidebar(true);
+    }
+  }, { passive: true });
+
   // Initialize Page Coordinator
   checkServerStatus();
   initFirebase();
   switchTab('dashboard'); // Start on Dashboard
 });
+

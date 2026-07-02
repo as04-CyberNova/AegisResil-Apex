@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CareerShield AI — Student Scam Protection & Resume Optimization</title>
   <meta name="description" content="Protect your early career journey. Analyze job messages for fraud and optimize your resume for ATS systems using Gemini AI.">
+  <meta name="theme-color" content="#0a0d16">
   <link rel="stylesheet" href="css/style.css">
   <!-- Chart.js for visualization -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
@@ -13,9 +14,19 @@
 </head>
 <body>
 
+  <!-- Mobile Hamburger Toggle Button -->
+  <button id="hamburger-btn" class="hamburger-btn" aria-label="Toggle navigation Menu">
+    <span class="hamburger-line"></span>
+    <span class="hamburger-line"></span>
+    <span class="hamburger-line"></span>
+  </button>
+
+  <!-- Mobile Sidebar Overlay Backdrop -->
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
   <div class="app-container">
     <!-- Sidebar Navigation -->
-    <aside class="sidebar">
+    <aside id="sidebar" class="sidebar">
       <div>
         <a href="#" class="brand">
           <div class="brand-icon">
