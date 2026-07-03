@@ -1557,7 +1557,7 @@ select.textarea-input {
 
   /* Results grid → single column */
   .results-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 
   /* Stats → auto-wrap columns based on width, prevent overflow */
