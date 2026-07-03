@@ -131,10 +131,10 @@ function renderHistoryTable() {
 
     return `
       <tr>
-        <td>${typeBadge}</td>
-        <td>${dateStr}</td>
-        <td style="color: var(--text-primary); font-weight: 500;">${escapeHtml(displayTitle)}</td>
-        <td>${resultMarkup}</td>
+        <td data-label="Type">${typeBadge}</td>
+        <td data-label="Date & Time">${dateStr}</td>
+        <td data-label="Details" style="color: var(--text-primary); font-weight: 500;">${escapeHtml(displayTitle)}</td>
+        <td data-label="Result">${resultMarkup}</td>
       </tr>
     `;
   }).join('');

@@ -199,7 +199,6 @@ body.sidebar-open .hamburger-line:nth-child(3) {
    MOBILE OVERLAY BACKDROP
    ============================================================ */
 .sidebar-overlay {
-  display: none;
   position: fixed;
   inset: 0;
   background: rgba(5, 8, 18, 0.75);
@@ -207,11 +206,15 @@ body.sidebar-open .hamburger-line:nth-child(3) {
   -webkit-backdrop-filter: blur(4px);
   z-index: var(--overlay-z);
   opacity: 0;
-  transition: opacity var(--transition);
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity var(--transition), visibility var(--transition);
 }
 
 body.sidebar-open .sidebar-overlay {
   opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 /* ============================================================
@@ -330,6 +333,7 @@ body.sidebar-open .sidebar-overlay {
   font-weight: 500;
   text-align: left;
   cursor: pointer;
+  min-height: 44px;
   /* ⚡ Specific transitions instead of 'all' */
   transition:
     color var(--transition-fast),
@@ -1470,10 +1474,7 @@ select.textarea-input {
     display: flex;
   }
 
-  /* Show overlay backdrop */
-  .sidebar-overlay {
-    display: block;
-  }
+  /* Show overlay backdrop (handled via pointer-events and visibility in base styles) */
 
   /* Sidebar becomes a fixed drawer */
   .sidebar {
@@ -1659,8 +1660,8 @@ select.textarea-input {
   }
 
   /* Charts cap height on tiny screens */
-  .charts-grid > .card canvas {
-    max-height: 220px !important;
+  .charts-grid > .card > div[style*="height"] {
+    height: 200px !important;
   }
 
   .btn {
@@ -1695,5 +1696,93 @@ select.textarea-input {
   .modal-card {
     width: calc(100vw - 1.5rem) !important;
     padding: 1.5rem !important;
+  }
+}
+
+/* ── RESPONSIVE TABLES UNDER 600px ────────────────────────── */
+@media (max-width: 600px) {
+  .history-table-container {
+    overflow-x: visible;
+  }
+  .history-table, 
+  .history-table thead, 
+  .history-table tbody, 
+  .history-table tr, 
+  .history-table th, 
+  .history-table td {
+    display: block;
+    width: 100%;
+  }
+  .history-table thead {
+    display: none;
+  }
+  .history-table tr {
+    margin-bottom: 1rem;
+    background: rgba(30, 41, 59, 0.25);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 1rem;
+  }
+  .history-table tr:last-child {
+    margin-bottom: 0;
+  }
+  .history-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: right;
+    padding: 0.65rem 0;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+  }
+  .history-table td:last-child {
+    border-bottom: none;
+  }
+  .history-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    text-align: left;
+    margin-right: 1rem;
+  }
+
+  /* Modal Overrides */
+  .modal-overlay {
+    padding: 0 !important;
+  }
+  .modal-card {
+    max-width: 100vw !important;
+    width: 100vw !important;
+    max-height: 100vh !important;
+    max-height: 100dvh !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    padding: 1.5rem 1.25rem !important;
+  }
+  #btn-close-lesson-modal, #btn-close-auth-modal {
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Simulator Active Chat Card dvh adjustments */
+  #simulator-active-card > .card {
+    height: calc(100dvh - 120px) !important;
+    padding: 1rem !important;
+  }
+  #btn-sim-voice-toggle {
+    width: 50px !important;
+    height: 50px !important;
+  }
+  #btn-sim-send {
+    height: 50px !important;
+  }
+  #sim-chat-input {
+    height: 50px !important;
   }
 }

@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Drag & Drop Event Listeners ---
   dropzone.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('click', (e) => e.stopPropagation());
 
   dropzone.addEventListener('dragover', (e) => {
     e.preventDefault();
