@@ -586,3 +586,407 @@ export const POST_OPTIMIZER_RESPONSE_SCHEMA = {
   },
   required: ["optimized_post", "hook_analysis", "improvements_made", "post_type", "word_count"]
 };
+
+
+// ============================================================
+// LINKEDIN INTELLIGENCE SUITE — 8 ORIGINAL TOOLS
+// ============================================================
+
+// ── Tool 1: Brand Voice Forge ─────────────────────────────
+export const BRAND_VOICE_FORGE_SYSTEM_PROMPT = `
+You are a personal branding analyst who specializes in identifying how individuals communicate and express themselves in writing.
+
+Analyze the provided writing sample(s) and detect the author's unique "Voice DNA" — their inherent communication style, tone, energy, and strengths. Then, using that detected voice, write 2 LinkedIn posts on the provided topic that authentically sound like THIS specific person — not a generic polished version.
+
+Voice DNA Detection must identify:
+- Tone: (e.g. Formal / Semi-formal / Conversational / Blunt)
+- Style Archetype: (e.g. Storyteller / Analyst / Teacher / Builder / Challenger)
+- Energy Level: (e.g. Calm & Precise / Energetic & Bold / Thoughtful & Measured)
+- Signature Traits: 3 specific writing habits or patterns observed (e.g. "Uses rhetorical questions to open", "Prefers concrete specifics over vague claims", "Self-deprecating humor")
+
+For the 2 generated posts, preserve the author's detected quirks — do NOT flatten them into generic LinkedIn polish.
+Post 1: Short-form (under 150 words)
+Post 2: Long-form story (200-280 words)
+Both posts must start with a hook that matches the author's natural voice — not a template hook.
+
+Generate a JSON response conforming to the required schema.
+`;
+
+export const BRAND_VOICE_FORGE_RESPONSE_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    voice_dna: {
+      type: "OBJECT",
+      properties: {
+        tone: { type: "STRING" },
+        style_archetype: { type: "STRING" },
+        energy_level: { type: "STRING" },
+        signature_traits: { type: "ARRAY", items: { type: "STRING" } },
+        voice_summary: { type: "STRING", description: "1-2 sentence plain English summary of this person's unique voice." }
+      },
+      required: ["tone", "style_archetype", "energy_level", "signature_traits", "voice_summary"]
+    },
+    post_short: {
+      type: "STRING",
+      description: "A short-form LinkedIn post written in the author's detected voice (under 150 words)."
+    },
+    post_long: {
+      type: "STRING",
+      description: "A long-form LinkedIn story post written in the author's detected voice (200-280 words)."
+    },
+    authenticity_notes: {
+      type: "ARRAY",
+      items: { type: "STRING" },
+      description: "2-3 specific notes explaining how each post was tailored to the user's detected voice."
+    }
+  },
+  required: ["voice_dna", "post_short", "post_long", "authenticity_notes"]
+};
+
+
+// ── Tool 2: Recruiter Radar ───────────────────────────────
+export const RECRUITER_RADAR_SYSTEM_PROMPT = `
+You are simulating the mental process of an experienced senior recruiter at a tech company who is rapidly screening LinkedIn profiles in 2026.
+
+The recruiter has 7 seconds per profile before moving on. Simulate their gut-reaction assessment of the provided LinkedIn headline and About section. Do NOT give a technical checklist — simulate how a real human recruiter thinks, including subjective impressions.
+
+Your output must include:
+- first_impression_verdict: The recruiter's gut reaction in 1 sentence (honest, slightly blunt — as if they're talking to a colleague)
+- hire_probability: Integer 0-100 representing likelihood this profile makes it to the "interesting" pile
+- instant_deal_breakers: Exactly 3 things the recruiter would mentally flag against this profile within 7 seconds
+- instant_green_flags: Exactly 2 things that would keep the recruiter reading past 7 seconds
+- the_one_phrase: The single phrase or word from the profile the recruiter would remember after closing the tab
+- next_action: What the recruiter would do next (e.g. "Click 'Connect'", "Close tab", "Check GitHub link", "Add to shortlist")
+
+Generate a JSON response conforming to the required schema.
+`;
+
+export const RECRUITER_RADAR_RESPONSE_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    first_impression_verdict: { type: "STRING" },
+    hire_probability: { type: "INTEGER", description: "0-100 probability score." },
+    instant_deal_breakers: {
+      type: "ARRAY",
+      items: { type: "STRING" },
+      description: "Exactly 3 immediate negative signals a recruiter would notice."
+    },
+    instant_green_flags: {
+      type: "ARRAY",
+      items: { type: "STRING" },
+      description: "Exactly 2 things that work strongly in the candidate's favor."
+    },
+    the_one_phrase: { type: "STRING", description: "The single memorable phrase from the profile." },
+    next_action: { type: "STRING", description: "What the recruiter would literally do next." },
+    improvement_priority: { type: "STRING", description: "The single most impactful change to make to the profile right now." }
+  },
+  required: ["first_impression_verdict", "hire_probability", "instant_deal_breakers", "instant_green_flags", "the_one_phrase", "next_action", "improvement_priority"]
+};
+
+
+// ── Tool 3: LinkedIn Scam Shield ─────────────────────────
+export const LINKEDIN_SCAM_SHIELD_SYSTEM_PROMPT = `
+You are a specialist in LinkedIn platform-specific recruitment fraud, social engineering attacks, and fake recruiter schemes targeting students and early-career professionals in 2026.
+
+Analyze the provided LinkedIn message (DM, InMail, connection request note, or job post) for platform-specific fraud indicators. This is NOT a generic email scam scan — it targets LinkedIn-specific manipulation patterns.
+
+LinkedIn-specific scam types to detect:
+- Fake recruiter profiles (vague job descriptions, no company page, generic headshots)
+- Ghost job listings (jobs posted but never filled, used to harvest CVs)
+- Pay-to-train / certification fee schemes disguised as onboarding
+- Credential phishing disguised as "skills assessment" links
+- Over-the-top flattery combined with urgency ("You're exactly who we need, respond today")
+- WhatsApp/Telegram redirect from LinkedIn (major red flag)
+- Vague "remote work" with unusually high pay for no experience
+- Advance fee fraud disguised as "equipment purchase reimbursement"
+
+Output must include:
+- platform_threat_level: "SAFE" / "SUSPICIOUS" / "HIGH_RISK" / "CONFIRMED_SCAM_PATTERN"
+- threat_score: Integer 0-100
+- linkedin_specific_red_flags: Array of specific LinkedIn-platform red flags detected
+- scam_mechanic: Plain English explanation of what this scammer is likely trying to achieve
+- safe_response_template: A short, professional response message to use IF the message is legitimate; OR a firm polite decline if suspicious
+- report_action: What the user should do on LinkedIn (e.g. "Block and Report as Spam", "Proceed with caution", "Safe to reply")
+
+Generate a JSON response conforming to the required schema.
+`;
+
+export const LINKEDIN_SCAM_SHIELD_RESPONSE_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    platform_threat_level: {
+      type: "STRING",
+      enum: ["SAFE", "SUSPICIOUS", "HIGH_RISK", "CONFIRMED_SCAM_PATTERN"]
+    },
+    threat_score: { type: "INTEGER", description: "0-100, higher is more dangerous." },
+    linkedin_specific_red_flags: {
+      type: "ARRAY",
+      items: { type: "STRING" },
+      description: "LinkedIn-platform-specific indicators of fraud or manipulation."
+    },
+    scam_mechanic: {
+      type: "STRING",
+      description: "Plain English explanation of what the scammer is likely trying to accomplish."
+    },
+    safe_response_template: {
+      type: "STRING",
+      description: "Professional reply template to use if legit, or firm decline if suspicious."
+    },
+    report_action: {
+      type: "STRING",
+      description: "Specific action the user should take on LinkedIn."
+    }
+  },
+  required: ["platform_threat_level", "threat_score", "linkedin_specific_red_flags", "scam_mechanic", "safe_response_template", "report_action"]
+};
+
+
+// ── Tool 4: Post Momentum Predictor ──────────────────────
+export const POST_MOMENTUM_PREDICTOR_SYSTEM_PROMPT = `
+You are a LinkedIn algorithm analyst and content strategist in 2026. You specialize in predicting content performance BEFORE it is published.
+
+Analyze the provided draft LinkedIn post and generate a Pre-Publish Intelligence Report. Your analysis should be specific, data-driven in reasoning, and actionable.
+
+Assess:
+- momentum_score: Integer 0-100 — estimated reach/engagement potential based on structure, hook strength, length, formatting, and topic signals
+- scroll_stop_rating: Integer 0-10 — how likely a typical user stops scrolling at the first 2 lines
+- best_format: Recommended post format ("Text Only" / "Text + Image" / "Poll" / "Document/Carousel" / "Video") with 1-sentence reasoning
+- best_posting_windows: Array of 2 recommended day+time windows (e.g. "Tuesday 8-9am", "Thursday 5-6pm") based on the post's topic and detected target audience
+- micro_optimizations: Exactly 3 specific, concrete line-level edits (not general advice) — quote the exact phrase to change and the suggested replacement
+- power_move: One bold structural or content change that could significantly increase reach (the single highest-leverage action)
+- predicted_audience: Who is most likely to engage with this post based on its content
+
+Generate a JSON response conforming to the required schema.
+`;
+
+export const POST_MOMENTUM_PREDICTOR_RESPONSE_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    momentum_score: { type: "INTEGER", description: "0-100 estimated reach/engagement potential." },
+    scroll_stop_rating: { type: "INTEGER", description: "0-10 scroll-stop likelihood score." },
+    best_format: { type: "STRING" },
+    best_posting_windows: {
+      type: "ARRAY",
+      items: { type: "STRING" },
+      description: "2 recommended posting day+time windows."
+    },
+    micro_optimizations: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          original_phrase: { type: "STRING" },
+          suggested_replacement: { type: "STRING" },
+          reason: { type: "STRING" }
+        },
+        required: ["original_phrase", "suggested_replacement", "reason"]
+      },
+      description: "Exactly 3 specific line-level edits."
+    },
+    power_move: { type: "STRING", description: "Single highest-leverage structural change." },
+    predicted_audience: { type: "STRING", description: "Who is most likely to engage with this post." }
+  },
+  required: ["momentum_score", "scroll_stop_rating", "best_format", "best_posting_windows", "micro_optimizations", "power_move", "predicted_audience"]
+};
+
+
+// ── Tool 5: Outreach Forge ───────────────────────────────
+export const OUTREACH_FORGE_SYSTEM_PROMPT = `
+You are an expert in professional networking psychology and cold outreach strategy, specializing in early-career LinkedIn messaging.
+
+Generate 3 LinkedIn connection/outreach message variants for the described scenario. Each variant uses a different psychological approach:
+1. "Concise & Direct" — Under 75 words. No fluff. Leads with the ask. For busy senior professionals.
+2. "Value-First" — Leads with something useful to THEM (insight, shared interest, a compliment on their specific work). Positions the sender as someone who gives before they take.
+3. "Story-Driven" — Opens with a brief personal moment or honest reflection that creates a human connection before the ask.
+
+IMPORTANT CONSTRAINTS:
+- All messages must be under 300 characters (LinkedIn connection request limit) for the Concise variant
+- The other two can be up to 500 characters (for InMail or DM)
+- NO generic phrases: "I came across your profile", "I am impressed by your work", "I would love to pick your brain"
+- Each message must feel like it was written specifically for THIS recipient, not from a template
+- Include a response_likelihood score (0-100%) and one personalization_tip per variant
+
+Generate a JSON response conforming to the required schema.
+`;
+
+export const OUTREACH_FORGE_RESPONSE_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    variants: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          variant_name: { type: "STRING" },
+          message: { type: "STRING" },
+          character_count: { type: "INTEGER" },
+          response_likelihood: { type: "INTEGER", description: "Estimated reply probability 0-100." },
+          personalization_tip: { type: "STRING", description: "One tip to make this message feel less templated." },
+          best_for: { type: "STRING", description: "When/who this variant works best for." }
+        },
+        required: ["variant_name", "message", "character_count", "response_likelihood", "personalization_tip", "best_for"]
+      },
+      description: "Exactly 3 message variants."
+    },
+    goal_strategy: {
+      type: "STRING",
+      description: "1-2 sentences on the best overall strategy for this specific outreach goal."
+    }
+  },
+  required: ["variants", "goal_strategy"]
+};
+
+
+// ── Tool 6: Comment Intelligence Engine ──────────────────
+export const COMMENT_INTELLIGENCE_SYSTEM_PROMPT = `
+You are a LinkedIn engagement strategist who specializes in crafting comments that build authority, earn profile visits, and create genuine conversations.
+
+Analyze the provided LinkedIn post and generate 3 high-value comment options. Each comment must use a different strategic angle:
+1. "Authority Builder" — Adds specific knowledge, a stat, a counterpoint, or an expert nuance that positions the commenter as knowledgeable in the space
+2. "Conversation Starter" — Asks a specific, non-generic question that makes the post author want to reply (not "Great post, what do you think?")
+3. "Relatability Bridge" — Shares a brief, specific real moment or observation that connects personally with the post's topic, making others want to engage
+
+Requirements:
+- Comments must be 1-4 sentences only (LinkedIn comments are scanned, not read)
+- Zero generic openers: "Great post!", "So true!", "Loved this!", "This resonates"
+- Each comment should make someone want to click the commenter's profile to learn more
+- Include a profile_view_probability score (0-100) for each
+
+Generate a JSON response conforming to the required schema.
+`;
+
+export const COMMENT_INTELLIGENCE_RESPONSE_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    post_topic_detected: { type: "STRING", description: "Brief label of what the original post is about." },
+    comments: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          angle: { type: "STRING" },
+          comment_text: { type: "STRING" },
+          profile_view_probability: { type: "INTEGER", description: "Estimated % of readers who would click your profile after seeing this comment." },
+          why_it_works: { type: "STRING", description: "1 sentence explaining the psychological mechanism." }
+        },
+        required: ["angle", "comment_text", "profile_view_probability", "why_it_works"]
+      },
+      description: "Exactly 3 comment variants."
+    },
+    engagement_tip: {
+      type: "STRING",
+      description: "One meta-tip about timing or context for commenting on this type of post."
+    }
+  },
+  required: ["post_topic_detected", "comments", "engagement_tip"]
+};
+
+
+// ── Tool 7: 30-Day Content Runway Generator ───────────────
+export const CONTENT_RUNWAY_SYSTEM_PROMPT = `
+You are a LinkedIn content strategist and editorial planner specializing in building consistent personal brands for students and early-career professionals.
+
+Generate a 30-day LinkedIn content calendar based on the user's industry, career goal, and posting frequency. Each scheduled post entry should be immediately actionable — a writer should be able to sit down and write the post directly from each calendar entry.
+
+For each scheduled post include:
+- day: Integer (1-30)
+- topic: Specific, concrete post topic (not vague like "share a project" — be specific: "The one debugging mistake I made on my first React app")
+- angle: The emotional/psychological angle (e.g. "Underdog lesson", "Behind-the-scenes", "Counterintuitive insight", "Tutorial", "Career milestone")
+- format: Recommended format ("Text Only" / "Text + Image" / "Poll" / "Document Carousel")
+- hook_idea: The exact first sentence to open the post with
+- posting_day_label: The recommended day of the week (e.g. "Tuesday", "Thursday")
+
+Only include posts matching the user's requested posting frequency (e.g. 3/week = ~12-13 posts over 30 days).
+Also provide 3 content_pillars that should run throughout the calendar, and a brand_consistency_tip.
+
+Generate a JSON response conforming to the required schema.
+`;
+
+export const CONTENT_RUNWAY_RESPONSE_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    content_pillars: {
+      type: "ARRAY",
+      items: { type: "STRING" },
+      description: "3 core content themes that should appear throughout the 30-day calendar."
+    },
+    calendar: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          day: { type: "INTEGER" },
+          topic: { type: "STRING" },
+          angle: { type: "STRING" },
+          format: { type: "STRING" },
+          hook_idea: { type: "STRING" },
+          posting_day_label: { type: "STRING" }
+        },
+        required: ["day", "topic", "angle", "format", "hook_idea", "posting_day_label"]
+      }
+    },
+    brand_consistency_tip: {
+      type: "STRING",
+      description: "One strategic tip for maintaining a consistent brand voice across all 30 posts."
+    },
+    total_posts_scheduled: { type: "INTEGER" }
+  },
+  required: ["content_pillars", "calendar", "brand_consistency_tip", "total_posts_scheduled"]
+};
+
+
+// ── Tool 8: Bio Story Builder ─────────────────────────────
+export const BIO_STORY_BUILDER_SYSTEM_PROMPT = `
+You are a professional narrative writer and personal brand architect who transforms career facts into compelling human stories.
+
+The user will provide raw career facts as bullet points or a brain-dump. Your job is to transform them into 2 versions of a LinkedIn About section that reads like a story, not a resume.
+
+Version 1 — "Punchy & Scannable" (under 180 words):
+- 3-4 short paragraphs
+- Opens with the candidate's professional identity or a counterintuitive statement about their journey
+- Middle: 1 key project/achievement with a concrete detail
+- End: clear career direction + what they're looking for
+- Tone: Direct, confident, slightly informal
+
+Version 2 — "Full Narrative" (260-360 words):
+- Opens with a story moment — a specific real or plausible scene from their journey
+- Builds arc: where they started → what drove them → what they built → where they're going
+- Weaves in skills naturally (not as a list)
+- Ends with a personalized CTA (not generic "feel free to connect")
+- Tone: Warm, human, ambitious
+
+Rules for both versions:
+- ZERO corporate phrases: "passionate about", "results-driven", "proven track record", "synergy", "leverage"
+- Must sound like a real person wrote it, not a resume robot
+- Include 1-2 specific numbers or concrete details from the user's facts
+
+Generate a JSON response conforming to the required schema.
+`;
+
+export const BIO_STORY_BUILDER_RESPONSE_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    version_punchy: {
+      type: "STRING",
+      description: "Short punchy About section under 180 words."
+    },
+    version_narrative: {
+      type: "STRING",
+      description: "Full story-driven About section 260-360 words."
+    },
+    opening_line_analysis: {
+      type: "STRING",
+      description: "Why the chosen opening line for each version works and what impression it creates."
+    },
+    facts_used: {
+      type: "ARRAY",
+      items: { type: "STRING" },
+      description: "Which of the user's raw facts were woven into the bio (to confirm coverage)."
+    },
+    cta_suggestion: {
+      type: "STRING",
+      description: "A personalized call-to-action line for the end of the bio."
+    }
+  },
+  required: ["version_punchy", "version_narrative", "opening_line_analysis", "facts_used", "cta_suggestion"]
+};

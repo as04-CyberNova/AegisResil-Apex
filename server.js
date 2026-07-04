@@ -27,8 +27,26 @@ import {
   PROFILE_OPTIMIZER_SYSTEM_PROMPT,
   PROFILE_OPTIMIZER_RESPONSE_SCHEMA,
   POST_OPTIMIZER_SYSTEM_PROMPT,
-  POST_OPTIMIZER_RESPONSE_SCHEMA
+  POST_OPTIMIZER_RESPONSE_SCHEMA,
+  // LinkedIn Intelligence Suite
+  BRAND_VOICE_FORGE_SYSTEM_PROMPT,
+  BRAND_VOICE_FORGE_RESPONSE_SCHEMA,
+  RECRUITER_RADAR_SYSTEM_PROMPT,
+  RECRUITER_RADAR_RESPONSE_SCHEMA,
+  LINKEDIN_SCAM_SHIELD_SYSTEM_PROMPT,
+  LINKEDIN_SCAM_SHIELD_RESPONSE_SCHEMA,
+  POST_MOMENTUM_PREDICTOR_SYSTEM_PROMPT,
+  POST_MOMENTUM_PREDICTOR_RESPONSE_SCHEMA,
+  OUTREACH_FORGE_SYSTEM_PROMPT,
+  OUTREACH_FORGE_RESPONSE_SCHEMA,
+  COMMENT_INTELLIGENCE_SYSTEM_PROMPT,
+  COMMENT_INTELLIGENCE_RESPONSE_SCHEMA,
+  CONTENT_RUNWAY_SYSTEM_PROMPT,
+  CONTENT_RUNWAY_RESPONSE_SCHEMA,
+  BIO_STORY_BUILDER_SYSTEM_PROMPT,
+  BIO_STORY_BUILDER_RESPONSE_SCHEMA
 } from './prompts.js';
+
 
 // Load environment variables
 dotenv.config();
@@ -929,8 +947,355 @@ app.post('/api/optimize-post', async (req, res) => {
   }
 });
 
+
+// ============================================================
+// LINKEDIN INTELLIGENCE SUITE — 8 ORIGINAL ROUTES
+// ============================================================
+
+/**
+ * Route: LinkedIn Intelligence — Tool 1: Brand Voice Forge
+ */
+app.post('/api/linkedin/brand-voice', async (req, res) => {
+  const { writingSample, topic } = req.body;
+  if (!writingSample || writingSample.trim().length < 30) {
+    return res.status(400).json({ error: 'Please provide a writing sample of at least 30 characters.' });
+  }
+
+  if (!hasApiKey) {
+    return res.json({
+      isDemo: true,
+      voice_dna: {
+        tone: 'Conversational with technical precision',
+        style_archetype: 'Builder / Teacher',
+        energy_level: 'Energetic & Bold',
+        signature_traits: [
+          'Opens statements with direct, confident assertions',
+          'Uses specific tool names and metrics instead of vague descriptions',
+          'Favors short punchy sentences followed by longer explanatory ones'
+        ],
+        voice_summary: 'This writer communicates like a practitioner who loves teaching — grounded in specifics, energetic, and refreshingly direct without being arrogant.'
+      },
+      post_short: `I spent 3 weeks learning Docker. Then deleted everything and started over.\n\nNot because I failed — because I finally understood what I was actually building.\n\n🔹 Containerized a Node.js app from scratch\n🔹 Debugged port binding issues at 2am (twice)\n🔹 Shipped it. It worked. Finally.\n\nSometimes the second build teaches you more than the first ever could.\n\n#Docker #StudentDeveloper #TechInterns`,
+      post_long: `Nobody warned me that "learning Docker" actually means learning 5 other things first.\n\nI picked up Docker in Week 1 of my internship prep. Six hours in, I had a running container. I was thrilled.\n\nWeek 3: I deleted every file and started over from scratch.\n\nNot because I broke something. Because I realized I'd copy-pasted my way through the whole thing and understood almost nothing.\n\n💻 What I Rebuilt\n🔹 Wrote every Dockerfile line manually — no boilerplate\n🔹 Debugged volume mounts until I could explain them to a friend\n🔹 Learned why containers ≠ VMs (this one changed how I think)\n🔹 Built a small Node.js app and containerized it end-to-end\n\n💡 Biggest Takeaway: Speed is a trap early on. Understanding compounds. Speed comes later.\n\n🚀 What's Next: Kubernetes basics. Apparently containers were just the warmup.\n\n💬 What's the hardest Docker concept you had to unlearn before it clicked?\n\n#Docker #DevOps #StudentDeveloper #TechInterns #SoftwareEngineering`,
+      authenticity_notes: [
+        'Used your natural "then I restarted" narrative pattern — your sample showed you favor honesty about false starts over polished success stories.',
+        'Short punchy opener matches your detected blunt assertion style — no softening phrases.',
+        'Specific time references ("Week 1", "2am") match your observed habit of grounding stories in concrete details.'
+      ]
+    });
+  }
+
+  try {
+    const userPrompt = `Writing Sample:\n${writingSample}\n\nTopic to write posts about:\n${topic || 'A recent technical project or learning experience'}`;
+    const result = await queryGemini(BRAND_VOICE_FORGE_SYSTEM_PROMPT, userPrompt, BRAND_VOICE_FORGE_RESPONSE_SCHEMA);
+    res.json(result);
+  } catch (error) {
+    console.error('Error in /api/linkedin/brand-voice:', error);
+    res.status(500).json({ error: 'Failed to analyze voice using Gemini API', details: error.message });
+  }
+});
+
+/**
+ * Route: LinkedIn Intelligence — Tool 2: Recruiter Radar
+ */
+app.post('/api/linkedin/recruiter-radar', async (req, res) => {
+  const { headline, about } = req.body;
+  if (!headline && !about) {
+    return res.status(400).json({ error: 'Provide at least a LinkedIn headline or About section.' });
+  }
+
+  if (!hasApiKey) {
+    return res.json({
+      isDemo: true,
+      first_impression_verdict: 'Generic student profile — sounds like every other CS junior I see today.',
+      hire_probability: 38,
+      instant_deal_breakers: [
+        'Headline uses "Aspiring" — signals lack of confidence and current contribution',
+        'No specific technologies or tools mentioned in first scan',
+        'About section reads like a resume objective, not a story'
+      ],
+      instant_green_flags: [
+        'Mentions a specific university project with a real outcome',
+        'Profile photo appears professional (inferred from structured formatting)'
+      ],
+      the_one_phrase: '"Aspiring Software Developer"',
+      next_action: 'Close tab — nothing here differentiates this candidate from 200 others in the same pool.',
+      improvement_priority: 'Replace "Aspiring" with your actual current role/activity: "CS Junior building full-stack apps | Seeking Summer 2025 SWE Internship"'
+    });
+  }
+
+  try {
+    const userPrompt = `LinkedIn Headline: ${headline || 'Not provided'}\n\nLinkedIn About Section:\n${about || 'Not provided'}`;
+    const result = await queryGemini(RECRUITER_RADAR_SYSTEM_PROMPT, userPrompt, RECRUITER_RADAR_RESPONSE_SCHEMA);
+    res.json(result);
+  } catch (error) {
+    console.error('Error in /api/linkedin/recruiter-radar:', error);
+    res.status(500).json({ error: 'Failed to run recruiter simulation using Gemini API', details: error.message });
+  }
+});
+
+/**
+ * Route: LinkedIn Intelligence — Tool 3: LinkedIn Scam Shield
+ */
+app.post('/api/linkedin/scam-shield', async (req, res) => {
+  const { message } = req.body;
+  if (!message || message.trim().length < 10) {
+    return res.status(400).json({ error: 'Please paste the LinkedIn message to analyze.' });
+  }
+
+  if (!hasApiKey) {
+    const msgLower = message.toLowerCase();
+    let platform_threat_level = 'SAFE';
+    let threat_score = 10;
+    let linkedin_specific_red_flags = [];
+    let scam_mechanic = 'Message appears to be a legitimate recruiter outreach based on standard patterns.';
+    let safe_response_template = 'Thank you for reaching out! I am currently exploring opportunities. Could you share more details about the role, the team structure, and the interview process? I would also like to confirm the official company careers page listing for this position.';
+    let report_action = 'Safe to reply — verify recruiter profile manually on LinkedIn before sharing your resume.';
+
+    if (msgLower.includes('whatsapp') || msgLower.includes('telegram')) {
+      platform_threat_level = 'HIGH_RISK';
+      threat_score = 88;
+      linkedin_specific_red_flags.push('Requests to move conversation off LinkedIn to WhatsApp/Telegram');
+      linkedin_specific_red_flags.push('Legitimate recruiters almost never redirect to encrypted messaging apps');
+      scam_mechanic = 'Moving you off LinkedIn removes the platform\'s scam reporting and evidence trail — a common tactic to avoid accountability.';
+      safe_response_template = 'Thank you, but I prefer to keep professional conversations on LinkedIn for record-keeping purposes. Please send any further details here.';
+      report_action = 'Do NOT move to WhatsApp. If they insist, block and report as "Suspicious Content" on LinkedIn.';
+    } else if (msgLower.includes('fee') || msgLower.includes('training cost') || msgLower.includes('upfront')) {
+      platform_threat_level = 'CONFIRMED_SCAM_PATTERN';
+      threat_score = 97;
+      linkedin_specific_red_flags.push('Mentions fees, training costs, or upfront payments');
+      scam_mechanic = 'Pay-to-train scheme: scammer profits from your "onboarding fee" with no real job on the other end.';
+      report_action = 'Block immediately. Report to LinkedIn as "Job Scam". Real employers never charge candidates.';
+    } else if (msgLower.includes('urgent') || msgLower.includes('selected you') || msgLower.includes('exactly what we')) {
+      platform_threat_level = 'SUSPICIOUS';
+      threat_score = 55;
+      linkedin_specific_red_flags.push('Excessive flattery combined with urgency ("you\'re exactly what we need")');
+      linkedin_specific_red_flags.push('No mention of specific skills that matched — generic praise');
+      scam_mechanic = 'Creates false urgency and inflated ego to bypass your critical thinking. Real recruiters describe why you specifically fit.';
+      report_action = 'Proceed with extreme caution. Request a video call with their official company email before sharing any documents.';
+    }
+
+    return res.json({ isDemo: true, platform_threat_level, threat_score, linkedin_specific_red_flags, scam_mechanic, safe_response_template, report_action });
+  }
+
+  try {
+    const result = await queryGemini(LINKEDIN_SCAM_SHIELD_SYSTEM_PROMPT, message, LINKEDIN_SCAM_SHIELD_RESPONSE_SCHEMA);
+    res.json(result);
+  } catch (error) {
+    console.error('Error in /api/linkedin/scam-shield:', error);
+    res.status(500).json({ error: 'Failed to analyze LinkedIn message using Gemini API', details: error.message });
+  }
+});
+
+/**
+ * Route: LinkedIn Intelligence — Tool 4: Post Momentum Predictor
+ */
+app.post('/api/linkedin/momentum', async (req, res) => {
+  const { draft } = req.body;
+  if (!draft || draft.trim().length < 20) {
+    return res.status(400).json({ error: 'Please paste a draft post to analyze.' });
+  }
+
+  if (!hasApiKey) {
+    return res.json({
+      isDemo: true,
+      momentum_score: 61,
+      scroll_stop_rating: 5,
+      best_format: 'Text Only — your post is narrative-driven; adding an image would distract from the story flow.',
+      best_posting_windows: ['Tuesday 8:00–9:30am', 'Thursday 5:00–6:30pm'],
+      micro_optimizations: [
+        { original_phrase: 'I learned a lot from this experience', suggested_replacement: 'This taught me one thing I wish someone had told me on day one.', reason: 'Vague learning statements get skipped — reframe as a specific witheld insight to create curiosity.' },
+        { original_phrase: 'It was really challenging', suggested_replacement: 'Three things broke before it worked.', reason: 'Concrete specifics are scannable and relatable — "challenging" is abstract and forgettable.' },
+        { original_phrase: 'Feel free to share your thoughts below!', suggested_replacement: 'What\'s the hardest part of X you\'ve hit? (I\'ll reply to every comment this week)', reason: 'A specific question + commitment to reply dramatically increases comment rate.' }
+      ],
+      power_move: 'Split your current single-block paragraph into 6-8 punchy single-line statements. LinkedIn rewards white space — walls of text get scrolled past.',
+      predicted_audience: 'CS students, junior developers, and early-career engineers who are currently in or preparing for their first internship.'
+    });
+  }
+
+  try {
+    const result = await queryGemini(POST_MOMENTUM_PREDICTOR_SYSTEM_PROMPT, draft, POST_MOMENTUM_PREDICTOR_RESPONSE_SCHEMA);
+    res.json(result);
+  } catch (error) {
+    console.error('Error in /api/linkedin/momentum:', error);
+    res.status(500).json({ error: 'Failed to predict post momentum using Gemini API', details: error.message });
+  }
+});
+
+/**
+ * Route: LinkedIn Intelligence — Tool 5: Outreach Forge
+ */
+app.post('/api/linkedin/outreach-forge', async (req, res) => {
+  const { targetPerson, background, goal } = req.body;
+  if (!targetPerson || !goal) {
+    return res.status(400).json({ error: 'Target person description and outreach goal are required.' });
+  }
+
+  if (!hasApiKey) {
+    return res.json({
+      isDemo: true,
+      variants: [
+        {
+          variant_name: 'Concise & Direct',
+          message: `Hi [Name] — I'm a CS junior building ML pipelines at my uni's research lab. I'm targeting ${targetPerson.split(' ')[0]}-type roles for Summer 2025 and noticed your trajectory. Would you be open to a 15-min call? No prep needed — just your honest experience.`,
+          character_count: 248,
+          response_likelihood: 32,
+          personalization_tip: 'Replace "your trajectory" with a specific career move of theirs you found interesting — it proves you actually looked at their profile.',
+          best_for: 'Senior ICs and busy hiring managers who value directness over small talk.'
+        },
+        {
+          variant_name: 'Value-First',
+          message: `Hi [Name] — I read your post on [specific topic] and tried applying your [specific tip] to my current project. Genuinely changed how I approached [specific problem]. I'm a CS student targeting roles like yours for 2025 — would love to ask you 2 questions about the transition from [their previous role] to [current role].`,
+          character_count: 352,
+          response_likelihood: 48,
+          personalization_tip: 'Fill in the post details specifically — generic "I found your content helpful" gets ignored. Reference the actual post title.',
+          best_for: 'Thought leaders and content creators who post regularly on LinkedIn.'
+        },
+        {
+          variant_name: 'Story-Driven',
+          message: `Hi [Name] — Six months ago I almost dropped my CS degree because I couldn't see a path forward. Then I found your talk on [topic]. Now I'm building [specific thing]. I'm applying for roles like yours this summer and would genuinely value 10 minutes of your time — not for advice, just to understand how you think about [specific aspect of their work].`,
+          character_count: 398,
+          response_likelihood: 41,
+          personalization_tip: 'The story must be real and specific — manufactured vulnerability is easy to detect and will kill your credibility instantly.',
+          best_for: 'Mentors, educators, and people who clearly enjoy sharing their journey in their own posts.'
+        }
+      ],
+      goal_strategy: `For a ${goal} goal, lead with the Value-First variant as your primary attempt. If no reply in 10 days, follow up with the Concise variant referencing your first message. Never send the same message twice.`
+    });
+  }
+
+  try {
+    const userPrompt = `Target Person: ${targetPerson}\nMy Background: ${background || 'Not specified'}\nOutreach Goal: ${goal}`;
+    const result = await queryGemini(OUTREACH_FORGE_SYSTEM_PROMPT, userPrompt, OUTREACH_FORGE_RESPONSE_SCHEMA);
+    res.json(result);
+  } catch (error) {
+    console.error('Error in /api/linkedin/outreach-forge:', error);
+    res.status(500).json({ error: 'Failed to generate outreach messages using Gemini API', details: error.message });
+  }
+});
+
+/**
+ * Route: LinkedIn Intelligence — Tool 6: Comment Intelligence Engine
+ */
+app.post('/api/linkedin/comment-intel', async (req, res) => {
+  const { post } = req.body;
+  if (!post || post.trim().length < 20) {
+    return res.status(400).json({ error: 'Please paste the LinkedIn post you want to comment on.' });
+  }
+
+  if (!hasApiKey) {
+    return res.json({
+      isDemo: true,
+      post_topic_detected: 'Career lessons from a technical project or internship experience',
+      comments: [
+        {
+          angle: 'Authority Builder',
+          comment_text: 'The restarting instinct is underrated. Studies on deliberate practice show that "desirable difficulties" — making learning harder on purpose — lead to 40% better retention. What you called wasted time is actually the mechanism of real learning.',
+          profile_view_probability: 68,
+          why_it_works: 'Adds a specific credible claim (research reference) that positions the commenter as someone who thinks rigorously — invites both agreement and debate.'
+        },
+        {
+          angle: 'Conversation Starter',
+          comment_text: 'Curious — at what point did you realize the copy-paste approach wasn\'t going to hold? Was there a specific moment that broke the illusion, or was it a slow creep?',
+          profile_view_probability: 52,
+          why_it_works: 'Asks about a specific emotional moment the author hasn\'t yet described — they\'ll almost always want to answer because it gives them a chance to elaborate on their own story.'
+        },
+        {
+          angle: 'Relatability Bridge',
+          comment_text: 'Did the same thing with Kubernetes last semester. Got it "working" in week 2. Understood it in week 6 after everything broke in production. The second build is always the real one.',
+          profile_view_probability: 44,
+          why_it_works: 'Mirrors the post\'s exact narrative arc (false start → real learning) with a different example — creates instant kinship without parroting the original post.'
+        }
+      ],
+      engagement_tip: 'Comment within the first 30-60 minutes of a post going live — LinkedIn\'s algorithm shows comments posted early to a wider secondary audience. Set a notification for creators you want to engage with consistently.'
+    });
+  }
+
+  try {
+    const result = await queryGemini(COMMENT_INTELLIGENCE_SYSTEM_PROMPT, post, COMMENT_INTELLIGENCE_RESPONSE_SCHEMA);
+    res.json(result);
+  } catch (error) {
+    console.error('Error in /api/linkedin/comment-intel:', error);
+    res.status(500).json({ error: 'Failed to generate comment intelligence using Gemini API', details: error.message });
+  }
+});
+
+/**
+ * Route: LinkedIn Intelligence — Tool 7: 30-Day Content Runway
+ */
+app.post('/api/linkedin/content-runway', async (req, res) => {
+  const { industry, goal, frequency } = req.body;
+  if (!industry || !goal) {
+    return res.status(400).json({ error: 'Industry and career goal are required.' });
+  }
+
+  if (!hasApiKey) {
+    return res.json({
+      isDemo: true,
+      content_pillars: [
+        'Technical Learning & Project Deep-Dives',
+        'Honest Career Journey & Lessons Learned',
+        'Industry Insights & Skill Building Tips'
+      ],
+      calendar: [
+        { day: 1, topic: 'The one thing I wish I knew before starting my first coding project', angle: 'Underdog lesson', format: 'Text Only', hook_idea: 'Nobody told me the most important skill in coding isn\'t writing code.', posting_day_label: 'Tuesday' },
+        { day: 4, topic: `Why I chose ${industry} over [alternative] — and what I got wrong`, angle: 'Counterintuitive insight', format: 'Text Only', hook_idea: `I used to think ${industry} was the safe choice. It\'s not.`, posting_day_label: 'Thursday' },
+        { day: 8, topic: 'Behind the scenes: how my latest project actually got built', angle: 'Behind-the-scenes', format: 'Text + Image', hook_idea: 'Here\'s what my project looked like at 11pm vs. the polished version I submitted.', posting_day_label: 'Tuesday' },
+        { day: 11, topic: '3 free resources that taught me more than my classes did this semester', angle: 'Tutorial/Value', format: 'Document Carousel', hook_idea: 'My professor assigned 400 pages. These 3 free resources taught me the same thing in 3 hours.', posting_day_label: 'Thursday' },
+        { day: 15, topic: 'I failed my first technical interview. Here\'s the exact question that broke me.', angle: 'Career milestone / Failure story', format: 'Text Only', hook_idea: 'I blanked on a question I\'d practiced 20 times. Completely froze.', posting_day_label: 'Tuesday' }
+      ],
+      brand_consistency_tip: 'Every post should pass the "would a friend text this to me?" test. If it sounds like a press release, rewrite the first sentence until it sounds like a real person talking.',
+      total_posts_scheduled: 5
+    });
+  }
+
+  try {
+    const userPrompt = `Industry/Field: ${industry}\nCareer Goal: ${goal}\nPosting Frequency: ${frequency || '2-3 times per week'}`;
+    const result = await queryGemini(CONTENT_RUNWAY_SYSTEM_PROMPT, userPrompt, CONTENT_RUNWAY_RESPONSE_SCHEMA);
+    res.json(result);
+  } catch (error) {
+    console.error('Error in /api/linkedin/content-runway:', error);
+    res.status(500).json({ error: 'Failed to generate content runway using Gemini API', details: error.message });
+  }
+});
+
+/**
+ * Route: LinkedIn Intelligence — Tool 8: Bio Story Builder
+ */
+app.post('/api/linkedin/bio-story', async (req, res) => {
+  const { facts } = req.body;
+  if (!facts || facts.trim().length < 30) {
+    return res.status(400).json({ error: 'Please provide your career facts (at least 30 characters).' });
+  }
+
+  if (!hasApiKey) {
+    return res.json({
+      isDemo: true,
+      version_punchy: `I build things that work, then figure out why they work.\n\nCurrently a CS junior at [University], spending most of my time on full-stack projects — lately a real-time chat app using React and Firebase that 40+ people in my department actually use.\n\nI care about writing code that's readable, not just functional. And I\'m getting better at the difference.\n\nLooking for a Summer 2025 software engineering internship where I can contribute on day one — and learn things my courses don\'t cover.\n\nOpen to connect with engineers, recruiters, and anyone building something interesting.`,
+      version_narrative: `Two years ago I failed my first coding project so badly that my professor suggested I "reconsider the major."\n\nI didn't reconsider. I rebuilt the project from scratch — twice.\n\nThat stubbornness turned out to be the most useful thing I brought to computer science. I'm now a CS junior at [University], and instead of struggling to get things running, I'm building tools people in my department actually use. My current project — a real-time collaboration app built with React, Node.js, and Firebase — has 40+ active users. It started as a homework assignment. It grew because I kept fixing the next problem.\n\nMy approach hasn\'t changed: build something real, break it, understand why it broke, build it better.\n\nI'm looking for a Summer 2025 SWE internship where the problems are hard enough to be interesting. I want to work with engineers who care about the craft, not just the shipping.\n\nIf that sounds like your team, let's talk.`,
+      opening_line_analysis: 'Punchy version opens with a paradox ("build things that work, then figure out why") — creates intrigue by subverting the expected order. Narrative version opens with a failure moment — immediately establishes authenticity and creates forward momentum to see how it resolved.',
+      facts_used: [
+        'CS junior at university',
+        'Full-stack development focus',
+        'React and Firebase project with 40+ users',
+        'Seeking Summer 2025 SWE internship'
+      ],
+      cta_suggestion: "If you're building something that needs someone who figures things out — I'd like to hear about it."
+    });
+  }
+
+  try {
+    const result = await queryGemini(BIO_STORY_BUILDER_SYSTEM_PROMPT, facts, BIO_STORY_BUILDER_RESPONSE_SCHEMA);
+    res.json(result);
+  } catch (error) {
+    console.error('Error in /api/linkedin/bio-story:', error);
+    res.status(500).json({ error: 'Failed to build bio story using Gemini API', details: error.message });
+  }
+});
+
 // Start the server
 app.listen(port, () => {
   console.log('\x1b[32m%s\x1b[0m', `🚀 CareerShield AI Server is running on http://localhost:${port}`);
   console.log('\x1b[36m%s\x1b[0m', `👉 Access the application in your browser at http://localhost:${port}`);
 });
+

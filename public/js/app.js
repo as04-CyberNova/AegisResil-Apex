@@ -47,6 +47,10 @@ document.addEventListener('DOMContentLoaded', () => {
     profile: {
       title: 'LinkedIn <em>Profile Optimizer</em>',
       desc: 'Optimize your LinkedIn headlines and About summary layouts to attract entry-level recruiters.'
+    },
+    linkedin: {
+      title: 'LinkedIn <em>Intelligence Suite</em>',
+      desc: 'Eight original AI tools to supercharge your LinkedIn presence — from voice analysis to scam detection.'
     }
   };
 
@@ -130,6 +134,10 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (tabId === 'coverletter') {
       if (window.checkCoverLetterContext) {
         window.checkCoverLetterContext();
+      }
+    } else if (tabId === 'linkedin') {
+      if (window.initLinkedInTab) {
+        window.initLinkedInTab();
       }
     }
   }

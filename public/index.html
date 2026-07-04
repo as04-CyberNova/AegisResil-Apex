@@ -136,6 +136,17 @@
               Profile Optimizer
             </button>
           </li>
+          <li class="nav-item" data-tab="linkedin">
+            <button class="nav-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="5" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="12" cy="19" r="2"/>
+                <line x1="5" y1="7" x2="5" y2="14"/><line x1="19" y1="7" x2="19" y2="14"/>
+                <line x1="6" y1="5" x2="10" y2="5"/><line x1="14" y1="5" x2="18" y2="5"/>
+                <line x1="5" y1="14" x2="10" y2="17"/><line x1="19" y1="14" x2="14" y2="17"/>
+              </svg>
+              LinkedIn Intel
+            </button>
+          </li>
         </ul>
       </div>
 
@@ -1493,6 +1504,404 @@
     </div>
   </div>
 
+      <!-- ═══════════════════════════════ VIEW 11: LINKEDIN INTELLIGENCE ═══════════════════════════════ -->
+      <section id="linkedin-view" class="tab-panel">
+
+        <!-- Section Header Banner -->
+        <div class="li-suite-banner">
+          <div class="li-suite-banner-text">
+            <h2 class="li-suite-title">LinkedIn <span class="li-suite-accent">Intelligence</span> Suite</h2>
+            <p class="li-suite-desc">8 original AI tools to build your brand, grow your reach, and stay safe on LinkedIn — built exclusively for CareerShield AI.</p>
+          </div>
+          <div class="li-suite-pills">
+            <span class="li-suite-pill">✦ Copyright-Safe</span>
+            <span class="li-suite-pill">✦ Student-First</span>
+            <span class="li-suite-pill">✦ Gemini-Powered</span>
+          </div>
+        </div>
+
+        <!-- Inner Sub-Tab Navigation -->
+        <div class="li-sub-tabs">
+          <button class="li-sub-tab-btn active" data-litab="brand-voice">🎙️ Brand Voice Forge</button>
+          <button class="li-sub-tab-btn" data-litab="recruiter-radar">📡 Recruiter Radar</button>
+          <button class="li-sub-tab-btn" data-litab="scam-shield">🛡️ Scam Shield</button>
+          <button class="li-sub-tab-btn" data-litab="momentum">🚀 Momentum Predictor</button>
+          <button class="li-sub-tab-btn" data-litab="outreach-forge">💬 Outreach Forge</button>
+          <button class="li-sub-tab-btn" data-litab="comment-intel">💡 Comment Intel</button>
+          <button class="li-sub-tab-btn" data-litab="content-runway">🗓️ Content Runway</button>
+          <button class="li-sub-tab-btn" data-litab="bio-story">🧬 Bio Story Builder</button>
+        </div>
+
+        <!-- ── PANEL 1: Brand Voice Forge ─────────────────────────── -->
+        <div id="li-panel-brand-voice" class="li-sub-panel active">
+          <div class="card">
+            <h3 class="li-tool-title">🎙️ Brand Voice Forge</h3>
+            <p class="li-tool-desc">Paste 2–3 things you've written (messages, posts, bios). AI detects your unique writing DNA and generates posts in <em>your authentic voice</em>.</p>
+            <div class="form-group">
+              <label class="form-label" for="bvf-sample">Your Writing Sample <span class="li-req">(min. 30 chars)</span></label>
+              <textarea id="bvf-sample" class="textarea-input" rows="5" placeholder="Paste any writing: a message you sent, a post draft, your bio paragraph, journal entry — anything you wrote naturally..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="bvf-topic">Topic for Generated Posts <span style="color:var(--text-muted);font-size:0.8rem;">(optional)</span></label>
+              <input id="bvf-topic" class="textarea-input" type="text" style="min-height:auto;padding:0.75rem 1rem;" placeholder="e.g. my internship project, what I learned from failing, why I chose data science...">
+            </div>
+            <button id="btn-bvf-forge" class="btn btn-primary" disabled>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              Forge My Voice &amp; Generate Posts
+            </button>
+          </div>
+          <div id="bvf-loading" class="card loading-card" style="display:none;align-items:center;justify-content:center;padding:2.5rem;flex-direction:column;gap:1rem;">
+            <div class="spinner"></div><div class="loading-text">Analyzing your writing DNA...</div>
+          </div>
+          <div id="bvf-results" style="display:none;margin-top:1.5rem;">
+            <!-- Voice DNA Card -->
+            <div class="card li-voice-dna-card">
+              <h4 class="li-section-hdr">🧬 Your Voice DNA</h4>
+              <div class="li-dna-grid">
+                <div class="li-dna-trait"><span class="li-dna-label">Tone</span><span id="bvf-dna-tone" class="li-dna-value"></span></div>
+                <div class="li-dna-trait"><span class="li-dna-label">Style Archetype</span><span id="bvf-dna-archetype" class="li-dna-value"></span></div>
+                <div class="li-dna-trait"><span class="li-dna-label">Energy Level</span><span id="bvf-dna-energy" class="li-dna-value"></span></div>
+              </div>
+              <p id="bvf-dna-summary" class="li-dna-summary"></p>
+              <ul id="bvf-dna-traits" class="li-trait-list"></ul>
+            </div>
+            <!-- Generated Posts -->
+            <div class="li-posts-grid">
+              <div class="card">
+                <div class="li-post-header"><h4>Short-Form Post</h4><button id="btn-bvf-copy-short" class="btn li-copy-btn">📋 Copy</button></div>
+                <pre id="bvf-post-short" class="li-post-output"></pre>
+              </div>
+              <div class="card">
+                <div class="li-post-header"><h4>Long-Form Story Post</h4><button id="btn-bvf-copy-long" class="btn li-copy-btn">📋 Copy</button></div>
+                <pre id="bvf-post-long" class="li-post-output"></pre>
+              </div>
+            </div>
+            <div class="card" style="margin-top:1rem;">
+              <h4 class="li-section-hdr">✦ Authenticity Notes</h4>
+              <ul id="bvf-auth-notes" class="li-auth-note-list"></ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── PANEL 2: Recruiter Radar ───────────────────────────── -->
+        <div id="li-panel-recruiter-radar" class="li-sub-panel">
+          <div class="card">
+            <h3 class="li-tool-title">📡 Recruiter Radar</h3>
+            <p class="li-tool-desc">See your LinkedIn profile through a senior recruiter's eyes — <em>in 7 seconds.</em> Get a Hire Probability score and the recruiter's honest gut reaction.</p>
+            <div class="form-group">
+              <label class="form-label" for="rr-headline">LinkedIn Headline</label>
+              <input id="rr-headline" class="textarea-input" type="text" style="min-height:auto;padding:0.75rem 1rem;" placeholder="e.g. CS Junior @ University | Building full-stack apps | Seeking SWE Internship 2025">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="rr-about">LinkedIn About / Bio Section</label>
+              <textarea id="rr-about" class="textarea-input" rows="5" placeholder="Paste your About section here..."></textarea>
+            </div>
+            <button id="btn-rr-analyze" class="btn btn-primary" disabled>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+              Run Recruiter Radar Simulation
+            </button>
+          </div>
+          <div id="rr-loading" class="card loading-card" style="display:none;align-items:center;justify-content:center;padding:2.5rem;flex-direction:column;gap:1rem;">
+            <div class="spinner"></div><div class="loading-text">Simulating recruiter's 7-second scan...</div>
+          </div>
+          <div id="rr-results" style="display:none;margin-top:1.5rem;">
+            <div class="results-grid">
+              <div class="card risk-indicator-card">
+                <div class="gauge-wrapper">
+                  <svg class="gauge-svg" viewBox="0 0 100 100">
+                    <circle class="gauge-bg" cx="50" cy="50" r="40"></circle>
+                    <circle id="rr-gauge-fill" class="gauge-fill" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="251.2"></circle>
+                  </svg>
+                  <div class="gauge-text">
+                    <span id="rr-hire-score" class="gauge-number">0</span>
+                    <span class="gauge-label">Hire Probability</span>
+                  </div>
+                </div>
+                <div class="li-verdict-block">
+                  <p class="li-verdict-label">Recruiter's Gut Reaction:</p>
+                  <blockquote id="rr-verdict" class="li-verdict-quote"></blockquote>
+                </div>
+              </div>
+              <div class="card details-card">
+                <div style="margin-bottom:1rem;">
+                  <h4 style="color:var(--color-danger);margin-bottom:0.5rem;">⚠ Instant Deal-Breakers</h4>
+                  <ul id="rr-deal-breakers" class="li-flag-list"></ul>
+                </div>
+                <div style="margin-bottom:1rem;">
+                  <h4 style="color:var(--color-safe);margin-bottom:0.5rem;">✓ Instant Green Flags</h4>
+                  <ul id="rr-green-flags" class="li-flag-list"></ul>
+                </div>
+                <div class="li-info-row"><span class="li-info-label">Memorable Phrase:</span><span id="rr-one-phrase" class="li-info-value" style="color:var(--primary);"></span></div>
+                <div class="li-info-row"><span class="li-info-label">Recruiter's Next Action:</span><span id="rr-next-action" class="li-info-value"></span></div>
+              </div>
+            </div>
+            <div class="card" style="margin-top:1rem;border-color:rgba(0,242,254,0.2);">
+              <h4 class="li-section-hdr">🎯 #1 Priority Fix</h4>
+              <p id="rr-priority" style="color:var(--text-primary);line-height:1.6;"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── PANEL 3: LinkedIn Scam Shield ──────────────────────── -->
+        <div id="li-panel-scam-shield" class="li-sub-panel">
+          <div class="card">
+            <h3 class="li-tool-title">🛡️ LinkedIn Scam Shield</h3>
+            <p class="li-tool-desc">Paste any LinkedIn DM, InMail, connection request note, or job post. AI detects <em>LinkedIn-specific</em> scam patterns — not generic email scans.</p>
+            <div class="form-group">
+              <label class="form-label" for="ss-message">LinkedIn Message / Post to Analyze</label>
+              <textarea id="ss-message" class="textarea-input" rows="7" placeholder="Paste the LinkedIn message, connection request, InMail, or job post here..."></textarea>
+            </div>
+            <button id="btn-ss-analyze" class="btn btn-primary" disabled>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Analyze with LinkedIn Scam Shield
+            </button>
+          </div>
+          <div id="ss-loading" class="card loading-card" style="display:none;align-items:center;justify-content:center;padding:2.5rem;flex-direction:column;gap:1rem;">
+            <div class="spinner"></div><div class="loading-text">Scanning for LinkedIn-specific fraud patterns...</div>
+          </div>
+          <div id="ss-results" style="display:none;margin-top:1.5rem;">
+            <div id="ss-threat-banner" class="li-threat-banner">
+              <span class="ss-threat-icon" style="font-size:2rem;"></span>
+              <div>
+                <div class="ss-threat-label" style="font-size:1.4rem;font-weight:900;"></div>
+                <div style="font-size:0.85rem;color:var(--text-secondary);">Platform Threat Level</div>
+              </div>
+              <span class="ss-threat-score" style="margin-left:auto;font-size:1.5rem;font-weight:800;"></span>
+            </div>
+            <div class="li-ss-grid">
+              <div class="card">
+                <h4 class="li-section-hdr">⚡ LinkedIn-Specific Red Flags</h4>
+                <ul id="ss-red-flags" class="li-flag-list"></ul>
+              </div>
+              <div class="card">
+                <h4 class="li-section-hdr">🎭 What They're Really After</h4>
+                <p id="ss-mechanic" style="color:var(--text-primary);line-height:1.6;"></p>
+                <h4 class="li-section-hdr" style="margin-top:1rem;">📋 Platform Action</h4>
+                <p id="ss-report-action" style="color:var(--text-primary);font-weight:600;"></p>
+              </div>
+            </div>
+            <div class="card" style="margin-top:1rem;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+                <h4 class="li-section-hdr" style="margin:0;">💬 Safe Response Template</h4>
+                <button id="btn-ss-copy-template" class="btn li-copy-btn">📋 Copy</button>
+              </div>
+              <pre id="ss-response-template" class="li-post-output" style="border-left:3px solid var(--primary);"></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── PANEL 4: Post Momentum Predictor ───────────────────── -->
+        <div id="li-panel-momentum" class="li-sub-panel">
+          <div class="card">
+            <h3 class="li-tool-title">🚀 Post Momentum Predictor</h3>
+            <p class="li-tool-desc">Don't post blind. Get a <em>Pre-Publish Intelligence Report</em> — momentum score, best timing, format recommendation, and 3 surgical edits before you hit publish.</p>
+            <div class="form-group">
+              <label class="form-label" for="mp-draft">Your Draft LinkedIn Post</label>
+              <textarea id="mp-draft" class="textarea-input" rows="7" placeholder="Paste your draft post here..."></textarea>
+            </div>
+            <button id="btn-mp-predict" class="btn btn-primary" disabled>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              Run Pre-Publish Intelligence Report
+            </button>
+          </div>
+          <div id="mp-loading" class="card loading-card" style="display:none;align-items:center;justify-content:center;padding:2.5rem;flex-direction:column;gap:1rem;">
+            <div class="spinner"></div><div class="loading-text">Predicting post performance...</div>
+          </div>
+          <div id="mp-results" style="display:none;margin-top:1.5rem;">
+            <div class="results-grid">
+              <div class="card risk-indicator-card">
+                <div class="gauge-wrapper">
+                  <svg class="gauge-svg" viewBox="0 0 100 100">
+                    <circle class="gauge-bg" cx="50" cy="50" r="40"></circle>
+                    <circle id="mp-gauge-fill" class="gauge-fill" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="251.2"></circle>
+                  </svg>
+                  <div class="gauge-text">
+                    <span id="mp-momentum-score" class="gauge-number">0</span>
+                    <span class="gauge-label">Momentum</span>
+                  </div>
+                </div>
+                <div style="text-align:center;margin-top:0.75rem;">
+                  <span style="color:var(--text-secondary);font-size:0.82rem;">Scroll-Stop Rating</span><br>
+                  <span id="mp-scroll-stop" style="font-size:2rem;font-weight:900;">0</span><span style="color:var(--text-secondary);"> /10</span>
+                </div>
+              </div>
+              <div class="card details-card">
+                <div class="li-info-row"><span class="li-info-label">Best Format:</span><span id="mp-format" class="li-info-value"></span></div>
+                <div class="li-info-row"><span class="li-info-label">Best Times:</span><div id="mp-windows" style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.25rem;"></div></div>
+                <div class="li-info-row" style="margin-top:0.75rem;"><span class="li-info-label">Predicted Audience:</span><span id="mp-audience" class="li-info-value" style="font-style:italic;"></span></div>
+                <div style="margin-top:1rem;padding:0.75rem;background:rgba(0,242,254,0.04);border-radius:8px;border:1px solid rgba(0,242,254,0.15);">
+                  <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:0.25rem;font-weight:700;">⚡ POWER MOVE</p>
+                  <p id="mp-power-move" style="color:var(--primary);font-weight:600;"></p>
+                </div>
+              </div>
+            </div>
+            <div class="card" style="margin-top:1rem;">
+              <h4 class="li-section-hdr">✂️ 3 Surgical Micro-Edits</h4>
+              <div id="mp-micro-opts" style="display:flex;flex-direction:column;gap:0.85rem;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── PANEL 5: Outreach Forge ─────────────────────────────── -->
+        <div id="li-panel-outreach-forge" class="li-sub-panel">
+          <div class="card">
+            <h3 class="li-tool-title">💬 Outreach Forge</h3>
+            <p class="li-tool-desc">Generate 3 psychologically distinct connection messages for any goal — each with a Reply Likelihood Score and character count for LinkedIn's 300-char limit.</p>
+            <div class="form-group">
+              <label class="form-label" for="of-target">Who Are You Reaching Out To?</label>
+              <input id="of-target" class="textarea-input" type="text" style="min-height:auto;padding:0.75rem 1rem;" placeholder="e.g. Senior Data Scientist at Google, ML Engineer at a Series B startup, SWE Intern at Meta...">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="of-background">Your Background <span style="color:var(--text-muted);font-size:0.8rem;">(2-3 sentences)</span></label>
+              <textarea id="of-background" class="textarea-input" rows="3" placeholder="Brief: your year, major, relevant projects or skills, and what you're currently working on..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="of-goal">Outreach Goal</label>
+              <select id="of-goal" class="textarea-input" style="min-height:auto;padding:0.75rem 1rem;">
+                <option value="">Select a goal...</option>
+                <option value="Get a Referral for a Job">🎯 Get a Referral for a Job</option>
+                <option value="Ask for Mentorship">🤝 Ask for Mentorship</option>
+                <option value="Request an Informational Call">📞 Request an Informational Call</option>
+                <option value="Thank After a Networking Event">🙏 Thank After a Networking Event</option>
+                <option value="Propose a Collaboration">🔗 Propose a Collaboration</option>
+              </select>
+            </div>
+            <button id="btn-of-forge" class="btn btn-primary" disabled>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Forge 3 Message Variants
+            </button>
+          </div>
+          <div id="of-loading" class="card loading-card" style="display:none;align-items:center;justify-content:center;padding:2.5rem;flex-direction:column;gap:1rem;">
+            <div class="spinner"></div><div class="loading-text">Forging psychological message variants...</div>
+          </div>
+          <div id="of-results" style="display:none;margin-top:1.5rem;">
+            <div id="of-variants" style="display:flex;flex-direction:column;gap:1rem;"></div>
+            <div class="card" style="margin-top:1rem;border-color:rgba(0,242,254,0.2);">
+              <h4 class="li-section-hdr">🎯 Goal Strategy</h4>
+              <p id="of-strategy" style="color:var(--text-primary);line-height:1.6;"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── PANEL 6: Comment Intelligence ──────────────────────── -->
+        <div id="li-panel-comment-intel" class="li-sub-panel">
+          <div class="card">
+            <h3 class="li-tool-title">💡 Comment Intelligence Engine</h3>
+            <p class="li-tool-desc">Paste any LinkedIn post and get 3 high-value comments — each with a different strategic angle and a <em>Profile View Probability Score</em>.</p>
+            <div class="form-group">
+              <label class="form-label" for="ci-post">LinkedIn Post to Comment On</label>
+              <textarea id="ci-post" class="textarea-input" rows="6" placeholder="Paste the LinkedIn post you want to leave a high-value comment on..."></textarea>
+            </div>
+            <button id="btn-ci-generate" class="btn btn-primary" disabled>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Generate 3 Strategic Comments
+            </button>
+          </div>
+          <div id="ci-loading" class="card loading-card" style="display:none;align-items:center;justify-content:center;padding:2.5rem;flex-direction:column;gap:1rem;">
+            <div class="spinner"></div><div class="loading-text">Engineering high-value comments...</div>
+          </div>
+          <div id="ci-results" style="display:none;margin-top:1.5rem;">
+            <p id="ci-topic" style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1rem;"></p>
+            <div id="ci-comments" style="display:flex;flex-direction:column;gap:1rem;"></div>
+            <div class="card" style="margin-top:1rem;background:rgba(0,242,254,0.02);border-color:rgba(0,242,254,0.15);">
+              <p id="ci-tip" style="color:var(--text-secondary);font-size:0.85rem;"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── PANEL 7: 30-Day Content Runway ─────────────────────── -->
+        <div id="li-panel-content-runway" class="li-sub-panel">
+          <div class="card">
+            <h3 class="li-tool-title">🗓️ 30-Day Content Runway Generator</h3>
+            <p class="li-tool-desc">Never stare at a blank screen again. Get a full 30-day content calendar with specific topics, hooks, formats, and best posting days.</p>
+            <div class="form-group">
+              <label class="form-label" for="cr-industry">Your Industry / Field</label>
+              <input id="cr-industry" class="textarea-input" type="text" style="min-height:auto;padding:0.75rem 1rem;" placeholder="e.g. Software Engineering, Data Science, UX Design, Finance, Cybersecurity...">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="cr-goal">Career Goal for this Month</label>
+              <input id="cr-goal" class="textarea-input" type="text" style="min-height:auto;padding:0.75rem 1rem;" placeholder="e.g. Get internship interviews, build a thought leadership presence, attract recruiters in ML...">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="cr-frequency">Posting Frequency</label>
+              <select id="cr-frequency" class="textarea-input" style="min-height:auto;padding:0.75rem 1rem;">
+                <option value="1 time per week">1x per week (~4 posts)</option>
+                <option value="2-3 times per week" selected>2-3x per week (~12 posts)</option>
+                <option value="5 times per week">5x per week (~20 posts)</option>
+                <option value="Daily">Daily (~30 posts)</option>
+              </select>
+            </div>
+            <button id="btn-cr-generate" class="btn btn-primary" disabled>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Generate My 30-Day Runway
+            </button>
+          </div>
+          <div id="cr-loading" class="card loading-card" style="display:none;align-items:center;justify-content:center;padding:2.5rem;flex-direction:column;gap:1rem;">
+            <div class="spinner"></div><div class="loading-text">Building your 30-day content runway...</div>
+          </div>
+          <div id="cr-results" style="display:none;margin-top:1.5rem;">
+            <div class="card">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                <h4 class="li-section-hdr" style="margin:0;">📌 Your 3 Content Pillars</h4>
+                <span id="cr-total-posts" class="li-suite-pill"></span>
+              </div>
+              <div id="cr-pillars" style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1.25rem;"></div>
+              <p id="cr-consistency-tip" style="font-size:0.85rem;color:var(--text-secondary);"></p>
+            </div>
+            <div id="cr-calendar" style="display:flex;flex-direction:column;gap:0.6rem;margin-top:1rem;"></div>
+          </div>
+        </div>
+
+        <!-- ── PANEL 8: Bio Story Builder ─────────────────────────── -->
+        <div id="li-panel-bio-story" class="li-sub-panel">
+          <div class="card">
+            <h3 class="li-tool-title">🧬 Bio Story Builder</h3>
+            <p class="li-tool-desc">Dump your career facts as bullet points. AI transforms them into 2 LinkedIn About sections — <em>Punchy</em> (under 180 words) &amp; <em>Full Narrative</em> (260-360 words) — that sound like a real human, not a resume robot.</p>
+            <div class="form-group">
+              <label class="form-label" for="bsb-facts">Your Career Facts <span style="color:var(--text-muted);font-size:0.8rem;">(brain-dump is fine)</span></label>
+              <textarea id="bsb-facts" class="textarea-input" rows="7" placeholder="Just list your facts freely:\n- CS Junior at XYZ University\n- Built a React + Firebase app used by 40+ students\n- Interned at ABC startup for 3 months (Summer 2024)\n- Interested in ML and backend engineering\n- Looking for SWE internship Summer 2025\n- Failed my first coding project, rebuilt it twice..."></textarea>
+            </div>
+            <button id="btn-bsb-build" class="btn btn-primary" disabled>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              Build My Bio Story
+            </button>
+          </div>
+          <div id="bsb-loading" class="card loading-card" style="display:none;align-items:center;justify-content:center;padding:2.5rem;flex-direction:column;gap:1rem;">
+            <div class="spinner"></div><div class="loading-text">Transforming your facts into a story...</div>
+          </div>
+          <div id="bsb-results" style="display:none;margin-top:1.5rem;">
+            <div class="card">
+              <div class="li-version-toggle">
+                <button class="bsb-version-btn active" data-version="punchy">📝 Punchy Version</button>
+                <button class="bsb-version-btn" data-version="narrative">📖 Full Narrative</button>
+              </div>
+              <div id="bsb-output-punchy">
+                <div class="li-post-header"><h4>Punchy &amp; Scannable (under 180 words)</h4><button id="btn-bsb-copy-punchy" class="btn li-copy-btn">📋 Copy</button></div>
+                <pre id="bsb-text-punchy" class="li-post-output"></pre>
+              </div>
+              <div id="bsb-output-narrative" style="display:none;">
+                <div class="li-post-header"><h4>Full Story Narrative (260-360 words)</h4><button id="btn-bsb-copy-narrative" class="btn li-copy-btn">📋 Copy</button></div>
+                <pre id="bsb-text-narrative" class="li-post-output"></pre>
+              </div>
+            </div>
+            <div class="li-bsb-meta-grid">
+              <div class="card">
+                <h4 class="li-section-hdr">✦ Opening Line Analysis</h4>
+                <p id="bsb-opening-analysis" style="color:var(--text-primary);line-height:1.6;"></p>
+              </div>
+              <div class="card">
+                <h4 class="li-section-hdr">✓ Career Facts Used</h4>
+                <ul id="bsb-facts-used" style="list-style:none;padding:0;display:flex;flex-direction:column;gap:0.3rem;"></ul>
+                <h4 class="li-section-hdr" style="margin-top:1rem;">💬 Suggested CTA</h4>
+                <p id="bsb-cta" style="color:var(--primary);font-style:italic;"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+
   <!-- Authentication Modal Popup -->
   <div id="auth-modal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(10, 15, 30, 0.8); backdrop-filter: blur(8px); justify-content: center; align-items: center; z-index: 2000; padding: 1.5rem;">
     <div class="card modal-card" style="max-width: 400px; width: 100%; border: 1px solid var(--border-glow); box-shadow: 0 0 35px rgba(0, 242, 254, 0.15); animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); background: #0b1120;">
@@ -1553,7 +1962,12 @@
   <script src="js/lessons.js"></script>
   <script src="js/coverletter.js"></script>
   <script src="js/profile.js"></script>
+  <script src="js/linkedin.js"></script>
   <script src="js/app.js"></script>
+
+  <!-- Copy Toast Notification -->
+  <div id="li-copy-toast" style="position:fixed;bottom:2rem;right:2rem;background:var(--color-safe);color:#fff;padding:0.6rem 1.2rem;border-radius:8px;font-size:0.85rem;font-weight:600;z-index:9999;opacity:0;transform:translateY(10px);transition:all 0.25s ease;pointer-events:none;">✓ Copied to clipboard!</div>
+  <style>#li-copy-toast.show{opacity:1;transform:translateY(0);}</style>
 
 </body>
 </html>
