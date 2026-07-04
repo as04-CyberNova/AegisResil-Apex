@@ -2020,6 +2020,9 @@ select.textarea-input {
     display: block;
     width: 100%;
   }
+  .history-table {
+    min-width: auto;
+  }
   .history-table thead {
     display: none;
   }

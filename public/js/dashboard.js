@@ -53,7 +53,7 @@ function renderHistoryTable() {
   if (history.length === 0) {
     historyRowsEl.innerHTML = `
       <tr>
-        <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 2.5rem 0;">
+        <td class="empty-history-cell" colspan="4" style="display: block; text-align: center; color: var(--text-muted); padding: 2.5rem 0; justify-content: center;">
           No scans registered yet. Switch to one of the analyzer or scanner tabs to start!
         </td>
       </tr>
