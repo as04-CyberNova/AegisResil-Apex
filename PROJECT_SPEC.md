@@ -1,6 +1,6 @@
-# CareerShield AI — Project Specification & Architecture (MVP)
+# AegisResil Apex — Project Specification & Architecture (MVP)
 
-CareerShield AI is a student-focused web application designed to help students analyze potential job scams/fraudulent recruiter messages and score their resumes for quality and ATS compatibility.
+AegisResil Apex is a student-focused web application designed to help students analyze potential job scams/fraudulent recruiter messages and score their resumes for quality and ATS compatibility.
 
 This document outlines the architecture, file structure, API prompt designs, and task breakdown for the MVP implementation.
 

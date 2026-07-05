@@ -1,5 +1,5 @@
 {
-  "name": "careershield-ai",
+  "name": "aegisresil-apex",
   "version": "1.0.0",
   "description": "Student-focused web app for job scam analysis and resume scoring using Gemini API",
   "main": "server.js",

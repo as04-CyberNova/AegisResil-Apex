@@ -113,13 +113,13 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (tabId === 'roadmap') {
       const roadmapResumeBadge = document.getElementById('roadmap-resume-badge');
       if (roadmapResumeBadge) {
-        const hasResume = !!sessionStorage.getItem('careershield_resume_text');
+        const hasResume = !!sessionStorage.getItem('aegisresil_resume_text');
         roadmapResumeBadge.style.display = hasResume ? 'flex' : 'none';
       }
     } else if (tabId === 'match') {
       const profileActive = document.getElementById('match-profile-active');
       const profileManual = document.getElementById('match-profile-manual');
-      const hasResume = !!sessionStorage.getItem('careershield_resume_text');
+      const hasResume = !!sessionStorage.getItem('aegisresil_resume_text');
 
       if (profileActive) profileActive.style.display = hasResume ? 'flex' : 'none';
       if (profileManual) profileManual.style.display = hasResume ? 'none' : 'block';
@@ -498,7 +498,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const themeSelector = document.getElementById('theme-selector');
   if (themeSelector) {
     // Load saved theme on boot
-    const savedTheme = localStorage.getItem('careershield_theme') || 'dark';
+    const savedTheme = localStorage.getItem('aegisresil_theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
     themeSelector.value = savedTheme;
 
@@ -506,7 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
     themeSelector.addEventListener('change', (e) => {
       const selectedTheme = e.target.value;
       document.documentElement.setAttribute('data-theme', selectedTheme);
-      localStorage.setItem('careershield_theme', selectedTheme);
+      localStorage.setItem('aegisresil_theme', selectedTheme);
     });
   }
 

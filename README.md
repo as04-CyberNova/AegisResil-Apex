@@ -1,4 +1,4 @@
-# CareerShield AI 🛡️
+# AegisResil Apex 🛡️
 
 > **An AI-powered career protection suite for students and entry-level candidates.**  
 > Fight job scams, optimize your resume, land internships, and build your professional brand — all in one premium dashboard.

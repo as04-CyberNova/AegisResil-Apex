@@ -1,5 +1,5 @@
 /**
- * CareerShield AI — Skill Gap Micro-Lessons Manager
+ * AegisResil Apex — Skill Gap Micro-Lessons Manager
  * Intercepts skill gaps clicks, queries lessons API (with grounding), and caches locally.
  */
 
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       titleEl.textContent = `Skill Micro-Lesson: ${cleanSkill}`;
 
-      const cacheKey = `careershield_lesson_v1_${cleanSkill.toLowerCase()}`;
+      const cacheKey = `aegisresil_lesson_v1_${cleanSkill.toLowerCase()}`;
       const cached = localStorage.getItem(cacheKey);
 
       if (cached) {

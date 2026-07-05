@@ -1,5 +1,5 @@
 /**
- * CareerShield AI — Internship Match Score Handler
+ * AegisResil Apex — Internship Match Score Handler
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const jobDescription = jobTextarea.value.trim();
     if (jobDescription.length < 10) return;
 
-    const resumeText = sessionStorage.getItem('careershield_resume_text') || '';
+    const resumeText = sessionStorage.getItem('aegisresil_resume_text') || '';
     const skillsText = skillsTextarea ? skillsTextarea.value.trim() : '';
 
     // Disable inputs & show loading state

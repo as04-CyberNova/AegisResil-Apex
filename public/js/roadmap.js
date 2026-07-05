@@ -1,5 +1,5 @@
 /**
- * CareerShield AI — Career Roadmap Generator Handler
+ * AegisResil Apex — Career Roadmap Generator Handler
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const skillLevel = selectLevel.value;
     const timelineMonths = durationInput.value;
-    const resumeText = sessionStorage.getItem('careershield_resume_text') || '';
+    const resumeText = sessionStorage.getItem('aegisresil_resume_text') || '';
 
     // Disable inputs & show loading state
     selectLevel.disabled = true;

@@ -1,5 +1,5 @@
 /**
- * CareerShield AI — Cover Letter & Application Message Generator Handler
+ * AegisResil Apex — Cover Letter & Application Message Generator Handler
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Verify and sync active resume from session storage
   window.checkCoverLetterContext = function() {
-    const resumeText = sessionStorage.getItem('careershield_resume_text');
+    const resumeText = sessionStorage.getItem('aegisresil_resume_text');
     if (resumeText && resumeText.trim().length > 50) {
       if (resumeBadge) resumeBadge.style.display = 'block';
       if (backgroundGroup) backgroundGroup.style.display = 'none';
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      const syncResume = sessionStorage.getItem('careershield_resume_text') || '';
+      const syncResume = sessionStorage.getItem('aegisresil_resume_text') || '';
       const hasSyncedResume = syncResume.trim().length > 50;
 
       const backgroundText = hasSyncedResume ? syncResume : backgroundTextarea.value.trim();

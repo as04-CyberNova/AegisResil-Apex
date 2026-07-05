@@ -1,5 +1,5 @@
 /**
- * CareerShield AI - Gemini System Prompts and Output Schemas
+ * AegisResil Apex - Gemini System Prompts and Output Schemas
  */
 
 export const SCAM_ANALYZER_SYSTEM_PROMPT = `

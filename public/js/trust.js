@@ -1,5 +1,5 @@
 /**
- * CareerShield AI — Company Trust Analyzer Handler
+ * AegisResil Apex — Company Trust Analyzer Handler
  */
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -1,10 +1,10 @@
 /**
- * CareerShield AI — Unified Storage Manager
+ * AegisResil Apex — Unified Storage Manager
  * Uses browser LocalStorage as default MVP database.
  * Easily upgradable to Firebase Firestore by changing these API methods.
  */
 
-const STORAGE_KEY = 'careershield_scans_v1';
+const STORAGE_KEY = 'aegisresil_scans_v1';
 
 window.StorageManager = {
   /**

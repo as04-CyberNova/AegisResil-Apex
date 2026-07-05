@@ -1,5 +1,5 @@
 /**
- * CareerShield AI — Resume Scorer Handler (PDF.js text extraction & client integration)
+ * AegisResil Apex — Resume Scorer Handler (PDF.js text extraction & client integration)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fileInput.value = '';
     extractedText = '';
     activeFilename = '';
-    sessionStorage.removeItem('careershield_resume_text');
+    sessionStorage.removeItem('aegisresil_resume_text');
     parseStatus.style.display = 'none';
     btnScore.disabled = true;
     resultsSection.style.display = 'none';
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error('Document is too short or contains no readable text characters.');
       }
 
-      sessionStorage.setItem('careershield_resume_text', extractedText);
+      sessionStorage.setItem('aegisresil_resume_text', extractedText);
 
       // Update successful parse state
       filenameText.textContent = `Selected: ${file.name}`;
