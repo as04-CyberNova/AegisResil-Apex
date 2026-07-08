@@ -1003,3 +1003,341 @@ export const BIO_STORY_BUILDER_RESPONSE_SCHEMA = {
   },
   required: ["version_punchy", "version_narrative", "opening_line_analysis", "facts_used", "cta_suggestion"]
 };
+
+// ── Tool 9: LinkedIn Growth Strategist ─────────────────────
+export const GROWTH_QUESTIONS_SYSTEM_PROMPT = `
+You are a 50-year-old expert LinkedIn Growth Strategist and personal branding coach.
+The user wants to grow their LinkedIn presence from their current baseline metrics (followers and connections) to approximately 10,000 followers/connections by the end of this year.
+Before you provide a custom growth strategy, you must ask the user 4 to 5 targeted diagnostic questions to understand their specific industry, target audience, expertise, and preferred content style.
+Format your response as a JSON object containing exactly 4-5 highly specific, targeted diagnostic questions.
+`;
+
+export const GROWTH_QUESTIONS_RESPONSE_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    questions: {
+      type: "ARRAY",
+      items: { type: "STRING" },
+      description: "A list of 4 to 5 targeted diagnostic questions."
+    }
+  },
+  required: ["questions"]
+};
+
+export const GROWTH_STRATEGY_SYSTEM_PROMPT = `
+You are a 50-year-old expert LinkedIn Growth Strategist and personal branding coach.
+The user wants to grow their LinkedIn presence to approximately 10,000 followers and connections by the end of this year.
+Based on their baseline metrics (followers, connections), the targeted diagnostic questions, and their answers, generate a highly actionable, week-by-week implementation plan.
+
+Your growth strategy must address these four core pillars:
+1. Profile Optimization: Exactly how to rewrite their headline, About section, and Featured section format to maximize inbound "Follow" conversions.
+2. The Outbound Strategy: A weekly system to maximize ~100 connection requests using 2nd-degree networks and high-value targets.
+3. The 5-3-2 Commenting Framework: Explain how they should find and engage with big creators, peers, and ideal connections daily to hijack existing reach.
+4. Content Blueprint: Plan 3-5 high-value posts per week. Provide specific templates or frameworks (text stories, carousels, guides) that work best for the algorithm.
+
+Strictly adhere to the following content guidelines:
+- Document, Educate, Inspire: Focus on sharing authentic learning journeys (lessons, ups and downs) instead of self-promotion/bragging.
+- Feed the Algorithm: Suggest specific formats (videos, text posts, image mixes) adapted to what is trending.
+- Create Content for the Right People: Target the specific demographic the candidate wants to reach, not vanity metrics.
+
+Generate a JSON response conforming to the required schema.
+`;
+
+export const GROWTH_STRATEGY_RESPONSE_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    estimated_weekly_growth: {
+      type: "STRING",
+      description: "Estimated followers/connections growth needed per week to reach 10,000 by the end of the year."
+    },
+    profile_optimization: {
+      type: "OBJECT",
+      properties: {
+        headline_rewrite: { type: "STRING", description: "Direct suggestions for rewriting the LinkedIn headline." },
+        about_rewrite: { type: "STRING", description: "Suggestions or direct template for the About section." },
+        featured_format: { type: "STRING", description: "How to structure and format the Featured section." },
+        strategy_rationale: { type: "STRING", description: "Rationale for these profile optimizations." }
+      },
+      required: ["headline_rewrite", "about_rewrite", "featured_format", "strategy_rationale"]
+    },
+    outbound_strategy: {
+      type: "OBJECT",
+      properties: {
+        weekly_system: { type: "STRING", description: "Action plan for utilizing ~100 weekly connection requests." },
+        target_criteria: { type: "STRING", description: "Who to target (2nd-degree networks, etc.)." },
+        connection_template: { type: "STRING", description: "Custom connection request note templates." }
+      },
+      required: ["weekly_system", "target_criteria", "connection_template"]
+    },
+    commenting_framework: {
+      type: "OBJECT",
+      properties: {
+        daily_routine: { type: "STRING", description: "Daily breakdown of commenting (how many creators, peers, etc.)." },
+        creators_to_target: { type: "STRING", description: "What kind of creators or topics to find." },
+        example_comment_approach: { type: "STRING", description: "Tactical advice on writing high-value comments." }
+      },
+      required: ["daily_routine", "creators_to_target", "example_comment_approach"]
+    },
+    content_blueprint: {
+      type: "OBJECT",
+      properties: {
+        weekly_posting_plan: { type: "STRING", description: "Plan for 3-5 posts per week including frequency and types." },
+        templates_and_formats: { type: "ARRAY", items: { type: "STRING" }, description: "Specific templates or post frameworks." },
+        content_themes: { type: "ARRAY", items: { type: "STRING" }, description: "3 main content pillars/themes tailored to their answers." }
+      },
+      required: ["weekly_posting_plan", "templates_and_formats", "content_themes"]
+    },
+    weekly_checklist: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          week_label: { type: "STRING", description: "e.g., 'Week 1-2' or 'Week 3'" },
+          focus: { type: "STRING", description: "Key theme or goal of this period." },
+          tasks: { type: "ARRAY", items: { type: "STRING" }, description: "List of actionable tasks." }
+        },
+        required: ["week_label", "focus", "tasks"]
+      },
+      description: "A 4-week step-by-step roadmap."
+    }
+  },
+  required: [
+    "estimated_weekly_growth",
+    "profile_optimization",
+    "outbound_strategy",
+    "commenting_framework",
+    "content_blueprint",
+    "weekly_checklist"
+  ]
+};
+
+// ── Tool 10: Personalized HR Interview Simulator ─────────────────────
+export const HR_INTERVIEW_SYSTEM_PROMPT = `
+You are a highly realistic elite HR Recruiter, Hiring Manager, or Talent Acquisition Specialist.
+Your goal is to simulate a highly realistic, professional, personalized, adaptive, interactive, and company-aware HR screening or behavioral interview.
+
+Do NOT conduct a technical interview. Do NOT ask coding questions or system design questions. Focus entirely on behavioral and HR assessment parameters (leadership, teamwork, conflict resolution, problem solving, motivation, and career goals).
+
+You must personalize the interview using the following setup values:
+- Target Job Role
+- Company Name
+- Experience Level
+- Resume Profile / Candidate Details
+- Industry
+- Preferred Language
+- Interview Style (Conversational, Standard, Stress)
+- Difficulty Level (Easy, Medium, Hard)
+
+Rules:
+1. Ask ONE question at a time. Do NOT include any intro notes or closing logs. Just the direct question.
+2. Wait for the candidate's response before proceeding.
+3. Personalize your question using the candidate's resume/profile details. Instead of abstract behavioral questions, ask about specific achievements, failures, or projects in their profile.
+4. If a company name is provided, incorporate the company's culture and values into your expectations.
+5. If the candidate reaches the end of the interview or you decide to conclude, output "[CONCLUDE]" at the end of your final statement.
+
+Adaptive Mode Instruction:
+- Constantly monitor the candidate's response.
+- If the candidate performs well: Increase question depth, introduce tougher behavioral questions, and probe more aggressively.
+- If the candidate struggles: Simplify slightly while continuing the assessment.
+
+Stress Interview Mode Instruction:
+- When "stress" style is enabled: Challenge weak answers, ask tougher follow-ups, test composure under pressure, and probe confidence aggressively, while remaining completely professional.
+
+Evaluate the following parameters silently throughout:
+- Speaking Skills
+- Verbal Clarity
+- Confidence
+- Communication Style
+- Professional Presence
+- Conversational Fluency
+- Listening Ability
+- Response Delivery
+`;
+
+export const HR_INTERVIEW_EVALUATION_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    overall_score: { type: "INTEGER", description: "Overall behavioral score from 0 to 100." },
+    hiring_recommendation: { type: "STRING", enum: ["STRONG_HIRE", "HIRE", "BORDERLINE", "NO_HIRE"], description: "Overall hiring decision." },
+    hiring_reason: { type: "STRING", description: "Detailed, honest, constructive HR justification reason for the decision." },
+    category_scores: {
+      type: "OBJECT",
+      properties: {
+        communication_skills: { type: "INTEGER" },
+        confidence: { type: "INTEGER" },
+        professionalism: { type: "INTEGER" },
+        clarity_of_thought: { type: "INTEGER" },
+        leadership_potential: { type: "INTEGER" },
+        teamwork: { type: "INTEGER" },
+        emotional_intelligence: { type: "INTEGER" },
+        cultural_fit: { type: "INTEGER" },
+        career_motivation: { type: "INTEGER" },
+        overall_role_fit: { type: "INTEGER" }
+      },
+      required: [
+        "communication_skills",
+        "confidence",
+        "professionalism",
+        "clarity_of_thought",
+        "leadership_potential",
+        "teamwork",
+        "emotional_intelligence",
+        "cultural_fit",
+        "career_motivation",
+        "overall_role_fit"
+      ]
+    },
+    strengths: { type: "ARRAY", items: { type: "STRING" }, description: "List of strongest qualities demonstrated." },
+    improvements: { type: "ARRAY", items: { type: "STRING" }, description: "List of biggest weaknesses or areas needing growth." },
+    questions_answered_well: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          question: { type: "STRING" },
+          answer: { type: "STRING" },
+          reason: { type: "STRING", description: "Why this response stood out." }
+        },
+        required: ["question", "answer", "reason"]
+      }
+    },
+    questions_needing_improvement: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          question: { type: "STRING" },
+          answer: { type: "STRING" },
+          reason: { type: "STRING", description: "What was lacking or incorrect." }
+        },
+        required: ["question", "answer", "reason"]
+      }
+    },
+    improved_sample_answers: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          question: { type: "STRING" },
+          original_answer: { type: "STRING" },
+          improved_answer: { type: "STRING", description: "A rewritten, complete drop-in interview-ready answer using the STAR method." }
+        },
+        required: ["question", "original_answer", "improved_answer"]
+      }
+    },
+    real_hr_questions: {
+      type: "ARRAY",
+      items: { type: "STRING" },
+      description: "List of 10 to 20 additional HR/behavioral questions likely to appear in the actual interview."
+    },
+    personalized_improvement_plan: {
+      type: "OBJECT",
+      properties: {
+        immediate_improvements: { type: "STRING", description: "Immediate steps to take right now." },
+        preparation_plan_24h: { type: "STRING", description: "24-hour timeline preparation checklist." },
+        preparation_plan_7d: { type: "STRING", description: "7-day comprehensive timeline study plan." },
+        interview_day_tips: { type: "STRING", description: "Actionable last-minute tips for the day of the interview." }
+      },
+      required: [
+        "immediate_improvements",
+        "preparation_plan_24h",
+        "preparation_plan_7d",
+        "interview_day_tips"
+      ]
+    },
+    qa_review: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          question: { type: "STRING" },
+          answer: { type: "STRING" },
+          score: { type: "INTEGER" },
+          critique: { type: "STRING" },
+          model_answer: { type: "STRING" }
+        },
+        required: ["question", "answer", "score", "critique", "model_answer"]
+      }
+    }
+  },
+  required: [
+    "overall_score",
+    "hiring_recommendation",
+    "hiring_reason",
+    "category_scores",
+    "strengths",
+    "improvements",
+    "questions_answered_well",
+    "questions_needing_improvement",
+    "improved_sample_answers",
+    "real_hr_questions",
+    "personalized_improvement_plan",
+    "qa_review"
+  ]
+};
+
+// ── Tool 11: Job Openings Finder ─────────────────────────────────────
+export const JOB_FINDER_SYSTEM_PROMPT = `
+You are an elite, highly intelligent recruitment search agent.
+Your task is to generate and curate the top 10 most relevant current job openings matching the candidate's criteria.
+
+Candidate details to match against:
+- Target Job Role / Title
+- Location
+- Experience Level
+- Expected Salary
+- Employment Type (Full-time, Hybrid, Remote)
+- Industry Preference
+
+Rules:
+1. Generate exactly 10 realistic, current job openings matching the criteria.
+2. Sort results by most recently posted first (all roles must be within the last 30 days).
+3. The date_posted field should be realistic (e.g. "2 days ago", "1 week ago", "28 days ago").
+4. Provide a realistic Apply Link (e.g., matching the company's domain or job portal schema).
+5. Identify the top 3 best matching roles for this candidate.
+6. Provide a concise, one-line justification for why each of the top 3 is a good fit.
+7. Suggest 2-3 alternate job titles the candidate can search for.
+`;
+
+export const JOB_FINDER_RESPONSE_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    jobs: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          title: { type: "STRING", description: "Job title" },
+          company: { type: "STRING", description: "Company name" },
+          location: { type: "STRING", description: "Job location" },
+          salary: { type: "STRING", description: "Salary range if shown, or 'Not Disclosed'" },
+          date_posted: { type: "STRING", description: "Time/Date posted within last 30 days" },
+          apply_link: { type: "STRING", description: "Direct apply URL link" }
+        },
+        required: ["title", "company", "location", "salary", "date_posted", "apply_link"]
+      }
+    },
+    top_matches: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          title: { type: "STRING" },
+          company: { type: "STRING" },
+          reason: { type: "STRING", description: "One-line justification of fit." }
+        },
+        required: ["title", "company", "reason"]
+      }
+    },
+    alternate_titles: {
+      type: "ARRAY",
+      items: { type: "STRING" },
+      description: "2-3 alternate titles."
+    }
+  },
+  required: ["jobs", "top_matches", "alternate_titles"]
+};
+
+
+
+

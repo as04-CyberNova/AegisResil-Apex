@@ -44,7 +44,15 @@ import {
   CONTENT_RUNWAY_SYSTEM_PROMPT,
   CONTENT_RUNWAY_RESPONSE_SCHEMA,
   BIO_STORY_BUILDER_SYSTEM_PROMPT,
-  BIO_STORY_BUILDER_RESPONSE_SCHEMA
+  BIO_STORY_BUILDER_RESPONSE_SCHEMA,
+  GROWTH_QUESTIONS_SYSTEM_PROMPT,
+  GROWTH_QUESTIONS_RESPONSE_SCHEMA,
+  GROWTH_STRATEGY_SYSTEM_PROMPT,
+  GROWTH_STRATEGY_RESPONSE_SCHEMA,
+  HR_INTERVIEW_SYSTEM_PROMPT,
+  HR_INTERVIEW_EVALUATION_SCHEMA,
+  JOB_FINDER_SYSTEM_PROMPT,
+  JOB_FINDER_RESPONSE_SCHEMA
 } from './prompts.js';
 
 
@@ -721,6 +729,309 @@ app.post('/api/simulator/evaluate', async (req, res) => {
 });
 
 /**
+ * Route: Personalized HR Interview Simulator Turn
+ */
+app.post('/api/hr-simulator/turn', async (req, res) => {
+  const { history, message, targetRole, companyName, expLevel, profile, industry, language, style, difficulty } = req.body;
+
+  if (!message || message.trim() === '') {
+    return res.status(400).json({ error: 'Message payload is required' });
+  }
+
+  // --- DEMO MODE FALLBACK ---
+  if (!hasApiKey) {
+    const chatLength = history ? history.length : 0;
+    let reply = '';
+
+    if (chatLength === 0) {
+      reply = `Hello! Thank you for coming in today. I am the Senior HR Recruiter here at ${companyName || 'the company'}. I've had a look at your background, especially your Google Data Analytics certification and Deloitte job simulation. Let's start with the basics: Tell me a bit about yourself and why you're interested in the ${targetRole || 'Data Analyst'} role with us.`;
+    } else if (chatLength === 2) {
+      reply = "That's a very clear overview. I noticed in your profile that you've done Deloitte Australia's Data Analytics Job Simulation. Can you share a specific situation during that or another project where you had to handle an urgent challenge, how you solved it, and what the final outcome was?";
+    } else if (chatLength === 4) {
+      reply = "Very interesting outcome. As an entry-level candidate, collaboration and communication are extremely important to us. Describe a situation where you had a disagreement or communication clash with a teammate, and how you resolved it to complete the project.";
+    } else {
+      reply = `Thank you. Lastly, since your dream path is to eventually grow to FAANG, why do you feel ${companyName || 'our company'} is the right next step for you now, and what are your salary expectations for this role?\n[CONCLUDE]`;
+    }
+
+    return res.json({ reply });
+  }
+  // --------------------------
+
+  try {
+    const systemPrompt = `${HR_INTERVIEW_SYSTEM_PROMPT}\n\nCandidate Setup Values:\n- Target Job Role: ${targetRole}\n- Company Name: ${companyName}\n- Experience Level: ${expLevel}\n- Resume Profile: ${profile}\n- Industry: ${industry}\n- Preferred Language: ${language}\n- Interview Style: ${style}\n- Difficulty Level: ${difficulty}`;
+
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-2.5-flash',
+      systemInstruction: systemPrompt
+    });
+
+    const chat = model.startChat({
+      history: history || []
+    });
+
+    const result = await chat.sendMessage(message);
+    const reply = result.response.text();
+
+    res.json({ reply });
+  } catch (error) {
+    console.error('Error in /api/hr-simulator/turn:', error);
+    res.status(500).json({
+      error: 'Failed to process HR interview turn using Gemini API',
+      details: error.message
+    });
+  }
+});
+
+/**
+ * Route: Evaluate Personalized HR Interview Transcript
+ */
+app.post('/api/hr-simulator/evaluate', async (req, res) => {
+  const { history, targetRole, companyName } = req.body;
+
+  if (!history || history.length === 0) {
+    return res.status(400).json({ error: 'Interview history transcript is required' });
+  }
+
+  // --- DEMO MODE FALLBACK ---
+  if (!hasApiKey) {
+    return res.json({
+      overall_score: 82,
+      hiring_recommendation: "HIRE",
+      hiring_reason: "The candidate demonstrates strong communication skills and clear motivation to grow their skills. They successfully used structured STAR format examples to describe their Deloitte job simulation project, demonstrating strong problem-solving capacity, although they need to upgrade their Python skills from beginner to intermediate to be fully ready for senior roles.",
+      category_scores: {
+        communication_skills: 85,
+        confidence: 80,
+        professionalism: 88,
+        clarity_of_thought: 84,
+        leadership_potential: 70,
+        teamwork: 78,
+        emotional_intelligence: 82,
+        cultural_fit: 86,
+        career_motivation: 90,
+        overall_role_fit: 82
+      },
+      strengths: [
+        "Strong structural flow when explaining your Deloitte project scenario.",
+        "Excellent alignment with our company values regarding self-learning and proactive improvement.",
+        "Clarity of career goals (dream path) shows high ambition and self-awareness."
+      ],
+      improvements: [
+        "Use more quantifiable metrics (e.g. percentages, dashboard user counts) in your STAR responses.",
+        "Your Python skills were noted as beginner; express more proactive urgency in how you are working to upgrade it.",
+        "Try to soften explanations of team conflicts by emphasizing collaborative alignment earlier."
+      ],
+      questions_answered_well: [
+        {
+          question: "Tell me a bit about yourself and why you're interested in this role.",
+          answer: history[2] ? history[2].parts[0].text : "I am a graduate looking for Data Analyst jobs.",
+          reason: "Directly connected certification background with target consulting work at Deloitte."
+        }
+      ],
+      questions_needing_improvement: [
+        {
+          question: "Can you share a specific situation during that or another project where you had to handle an urgent challenge?",
+          answer: history[4] ? history[4].parts[0].text : "I worked on a Python EDA project and had to clean a lot of messy data before creating Power BI dashboards.",
+          reason: "Too generic and lacked concrete business impact or STAR structuring details."
+        }
+      ],
+      improved_sample_answers: [
+        {
+          question: "Can you share a specific situation during that or another project where you had to handle an urgent challenge?",
+          original_answer: history[4] ? history[4].parts[0].text : "I worked on a Python EDA project and had to clean a lot of messy data before creating Power BI dashboards.",
+          improved_answer: "During my Deloitte Australia Job Simulation, our client's source database had missing logs three days before the review. I took the lead, wrote a Python Pandas cleanup script to impute empty entries, and deployed the Power BI dashboard on time, achieving a 100% data integrity rating."
+        }
+      ],
+      real_hr_questions: [
+        "Why do you want to work for Deloitte Australia specifically?",
+        "Where do you see yourself in five years?",
+        "Tell me about a time you worked in a team and faced a major deadline constraint.",
+        "How do you handle feedback when someone criticizes your data visualization choices?",
+        "Describe a time you went above and beyond to solve a data anomaly.",
+        "What are your salary expectations for this Data Analyst role?",
+        "Why should we hire you over other candidates with similar certifications?",
+        "How do you prioritize multiple analysis requests from different stakeholders?",
+        "Tell me about a time you failed to meet a project goal and what you learned.",
+        "What data analyst tool are you most passionate about, and why?"
+      ],
+      personalized_improvement_plan: {
+        immediate_improvements: "Focus on formulating three distinct STAR-method stories emphasizing quantifiable metrics.",
+        preparation_plan_24h: "Write out answers to Deloitte's core behavioral questions, practice them aloud in front of a mirror, and review key dashboard metrics.",
+        preparation_plan_7d: "Perform 3 mock interviews daily, expand Python programming fundamentals to reach an intermediate level, and polish your LinkedIn profile summary.",
+        interview_day_tips: "Take deep breaths to control vocal pace, dress professionally, and ensure your camera and microphone are optimized."
+      },
+      qa_review: [
+        {
+          question: "Tell me a bit about yourself and why you're interested in this role.",
+          answer: history[2] ? history[2].parts[0].text : "I am a graduate looking for Data Analyst jobs.",
+          score: 85,
+          critique: "Clear and confident overview. Good mention of certification highlights. Could align the 'why this company' part more tightly with the target company values.",
+          model_answer: "I am a certified Data Analyst with a Google certification and a Deloitte job simulation. I specialize in Python and SQL. I am excited to join your company because of your data-driven culture and focus on solving scaling challenges."
+        },
+        {
+          question: "Can you share a specific situation during that or another project where you had to handle an urgent challenge?",
+          answer: history[4] ? history[4].parts[0].text : "I worked on a Python EDA project and had to clean a lot of messy data before creating Power BI dashboards.",
+          score: 78,
+          critique: "Excellent technical outline of the data cleaning pipeline. To improve, apply the STAR framework more explicitly: what was the business impact or user count of the dashboards?",
+          model_answer: "For our graduation dashboard, the client needed real-time charts within 3 days. I used Pandas to automate data cleaning, decreasing processing time by 40% and deploying the Power BI dashboard on time."
+        }
+      ]
+    });
+  }
+  // --------------------------
+
+  try {
+    const userPrompt = `Evaluate the following transcript of an HR mock interview for the role of "${targetRole || 'Data Analyst'}" at "${companyName || 'Deloitte Australia'}".\n\nTranscript History:\n${JSON.stringify(history)}`;
+
+    const result = await queryGemini(
+      `You are an elite HR consultant evaluating interview transcripts. Grade the candidate response on STAR structure, confidence, cultural fit, and communication clarity. Return JSON matching the schema.`,
+      userPrompt,
+      HR_INTERVIEW_EVALUATION_SCHEMA
+    );
+    res.json(result);
+  } catch (error) {
+    console.error('Error in /api/hr-simulator/evaluate:', error);
+    res.status(500).json({
+      error: 'Failed to evaluate HR interview using Gemini API',
+      details: error.message
+    });
+  }
+});
+
+/**
+ * Route: Job Openings Finder Search
+ */
+app.post('/api/job-finder/search', async (req, res) => {
+  const { role, location, experience, expectedSalary, employmentType, industryPreference } = req.body;
+
+  // --- DEMO MODE FALLBACK ---
+  if (!hasApiKey) {
+    return res.json({
+      jobs: [
+        {
+          title: "HR Manager",
+          company: "TechNovus India",
+          location: "Vadodara, Gujarat (Hybrid)",
+          salary: "₹7.0 - 9.0 LPA",
+          date_posted: "3 days ago",
+          apply_link: "https://www.linkedin.com/jobs/view/hr-manager-technovus"
+        },
+        {
+          title: "People Operations Generalist",
+          company: "Mediaverse Corp",
+          location: "Vadodara, Gujarat",
+          salary: "₹6.0 - 8.0 LPA",
+          date_posted: "5 days ago",
+          apply_link: "https://www.naukri.com/job-listings-people-ops-mediaverse"
+        },
+        {
+          title: "Human Resources Lead",
+          company: "CyberNova Studios",
+          location: "Remote (India)",
+          salary: "₹8.0 - 10.0 LPA",
+          date_posted: "10 days ago",
+          apply_link: "https://www.cybernova.com/careers/hr-lead"
+        },
+        {
+          title: "Assistant HR Manager",
+          company: "InfraBuild Projects",
+          location: "Vadodara, Gujarat",
+          salary: "₹6.5 LPA",
+          date_posted: "12 days ago",
+          apply_link: "https://www.indeed.com/jobs/view/assistant-hr-infrabuild"
+        },
+        {
+          title: "HR Generalist",
+          company: "Apex Solutions",
+          location: "Vadodara, Gujarat",
+          salary: "₹7.0 LPA",
+          date_posted: "15 days ago",
+          apply_link: "https://www.apex.com/jobs/hr-generalist"
+        },
+        {
+          title: "People Operations Manager",
+          company: "Flicker Media",
+          location: "Remote (India)",
+          salary: "₹9.0 LPA",
+          date_posted: "18 days ago",
+          apply_link: "https://www.linkedin.com/jobs/view/people-ops-flicker"
+        },
+        {
+          title: "Human Resources Manager",
+          company: "TCS Vadodara",
+          location: "Vadodara, Gujarat",
+          salary: "₹8.5 LPA",
+          date_posted: "20 days ago",
+          apply_link: "https://www.tcs.com/careers/hr-manager"
+        },
+        {
+          title: "HR Manager",
+          company: "StarHub Communications",
+          location: "Vadodara, Gujarat",
+          salary: "₹7.5 LPA",
+          date_posted: "22 days ago",
+          apply_link: "https://www.indeed.com/jobs/view/hr-starhub"
+        },
+        {
+          title: "Talent Operations Lead",
+          company: "Wipro Digital",
+          location: "Vadodara, Gujarat (Hybrid)",
+          salary: "₹9.5 LPA",
+          date_posted: "25 days ago",
+          apply_link: "https://careers.wipro.com/jobs/talent-ops"
+        },
+        {
+          title: "HR Executive (Generalist)",
+          company: "L&T Vadodara",
+          location: "Vadodara, Gujarat",
+          salary: "₹6.0 LPA",
+          date_posted: "28 days ago",
+          apply_link: "https://www.naukri.com/job-listings-hr-exec-lt"
+        }
+      ],
+      top_matches: [
+        {
+          title: "HR Manager",
+          company: "TechNovus India",
+          reason: "Matches your salary range (7-9 LPA), is local in Vadodara, and is in your preferred tech/hybrid setting."
+        },
+        {
+          title: "People Operations Generalist",
+          company: "Mediaverse Corp",
+          reason: "Directly aligns with your Media industry preference and matches your exact experience profile."
+        },
+        {
+          title: "Human Resources Lead",
+          company: "CyberNova Studios",
+          reason: "Fully remote role that meets the high end of your salary expectation (up to 10 LPA)."
+        }
+      ],
+      alternate_titles: [
+        "People Operations Lead",
+        "HR Business Partner (HRBP)",
+        "Talent Acquisition & Operations Manager"
+      ]
+    });
+  }
+
+  try {
+    const userPrompt = `Search criteria:\n- Job Title: ${role}\n- Location: ${location}\n- Experience: ${experience}\n- Expected Salary: ${expectedSalary}\n- Employment Type: ${employmentType}\n- Industry Preference: ${industryPreference}\n\nGenerate exactly 10 matching jobs, highlight top 3 matches, and provide alternate search titles.`;
+
+    const result = await queryGemini(
+      JOB_FINDER_SYSTEM_PROMPT,
+      userPrompt,
+      JOB_FINDER_RESPONSE_SCHEMA
+    );
+    res.json(result);
+  } catch (error) {
+    console.error('Error in /api/job-finder/search:', error);
+    res.status(500).json({
+      error: 'Failed to find job openings using Gemini API',
+      details: error.message
+    });
+  }
+});
+
+/**
  * Route: Feature 7 - Skill-Gap Micro-Lessons
  */
 app.post('/api/skill-lesson', async (req, res) => {
@@ -1290,6 +1601,131 @@ app.post('/api/linkedin/bio-story', async (req, res) => {
   } catch (error) {
     console.error('Error in /api/linkedin/bio-story:', error);
     res.status(500).json({ error: 'Failed to build bio story using Gemini API', details: error.message });
+  }
+});
+
+/**
+ * Route: LinkedIn Intelligence — Tool 9a: Growth Strategist Questions
+ */
+app.post('/api/linkedin/growth/questions', async (req, res) => {
+  const { followers, connections } = req.body;
+  if (followers === undefined || connections === undefined) {
+    return res.status(400).json({ error: 'Please provide baseline followers and connections.' });
+  }
+
+  if (!hasApiKey) {
+    return res.json({
+      isDemo: true,
+      questions: [
+        "What industry are you in, and what is your primary niche or target domain (e.g. Software Engineering, FinTech, Product Management)?",
+        "Who is your target audience on LinkedIn (e.g. recruiters at mid-sized startups, engineering directors at tech giants, fellow developers)?",
+        "What specific expertise or key projects do you want to highlight as your primary value proposition?",
+        "What is your preferred content style (e.g. text-only stories, image-based tutorials, step-by-step guides, or carousel slides)?",
+        "How much time can you realistically dedicate to LinkedIn activity daily (e.g. 15 minutes, 30 minutes, 1 hour)?"
+      ]
+    });
+  }
+
+  try {
+    const userPrompt = `Baseline metrics: Current Followers = ${followers}, Current Connections = ${connections}`;
+    const result = await queryGemini(GROWTH_QUESTIONS_SYSTEM_PROMPT, userPrompt, GROWTH_QUESTIONS_RESPONSE_SCHEMA);
+    res.json(result);
+  } catch (error) {
+    console.error('Error in /api/linkedin/growth/questions:', error);
+    res.status(500).json({ error: 'Failed to generate diagnostic questions using Gemini API', details: error.message });
+  }
+});
+
+/**
+ * Route: LinkedIn Intelligence — Tool 9b: Growth Strategist Strategy
+ */
+app.post('/api/linkedin/growth/strategy', async (req, res) => {
+  const { followers, connections, qaPairs } = req.body;
+  if (followers === undefined || connections === undefined || !qaPairs || !Array.isArray(qaPairs)) {
+    return res.status(400).json({ error: 'Baseline metrics and diagnostic Q&A pairs are required.' });
+  }
+
+  if (!hasApiKey) {
+    return res.json({
+      isDemo: true,
+      estimated_weekly_growth: "+180 connection/follower growth per week",
+      profile_optimization: {
+        headline_rewrite: "🚀 Aspiring SWE @ Google | building scalable Go backend microservices | 2x Hackathon Winner | React & Node.js developer",
+        about_rewrite: "I spent 6 months building a real-time multiplayer board game engine. Not because I needed another portfolio piece, but because I wanted to understand web-sockets and race conditions.\n\nToday, I build backend pipelines and React interfaces. I'm focusing my next 6 months on cloud architectures (AWS) and looking for Summer 2025 internship opportunities.",
+        featured_format: "Format: Link to GitHub/live demo of your top project as the 1st card. Link to a high-performing post sharing a failure-learned lesson as the 2nd card.",
+        strategy_rationale: "Aligns your profile around high-value proof-of-work (Go & microservices) which appeals directly to senior engineering directors."
+      },
+      outbound_strategy: {
+        weekly_system: "Send 20 highly targeted connection requests daily from Monday to Friday (~100/week). Target alumni or 2nd-degree connections in tech roles.",
+        target_criteria: "Focus 70% on mid-to-senior software engineers (potential referrers) and 30% on tech recruiters at Series A/B startups.",
+        connection_template: "Hi [Name] — I noticed your work building scalable microservices at [Company]. I'm a CS junior specializing in Go/distributed systems. Followed your profile to learn from your technical posts. Open to connecting!"
+      },
+      commenting_framework: {
+        daily_routine: "Engage with 5 big creators in tech, 3 peers building active projects, and 2 target connections (recruiters/managers). Daily commitment: 25 mins.",
+        creators_to_target: "Find creators posting about backend architecture, cloud infrastructure, or tech career development.",
+        example_comment_approach: "Avoid saying 'Great post!'. Instead, share a micro-lesson: 'This reminds me of when I tried using REST instead of gRPC. The latency difference was night and day because...'"
+      },
+      content_blueprint: {
+        weekly_posting_plan: "Post 3 times per week (Tuesday, Wednesday, Thursday morning).",
+        templates_and_formats: [
+          "Format 1 (Text Story): Share the story of a bug that took you 3 days to fix.",
+          "Format 2 (Carousels): A visual breakdown of 'gRPC vs REST' for students.",
+          "Format 3 (Document/PDF Guide): A cheat sheet of essential Git commands you use daily."
+        ],
+        content_themes: [
+          "Theme 1: Behind-the-scenes of building backend microservices (Document, Educate, Inspire)",
+          "Theme 2: Demystifying complex technical concepts for peers",
+          "Theme 3: Sharing lessons learned from failures/debugging sessions"
+        ]
+      },
+      weekly_checklist: [
+        {
+          week_label: "Week 1",
+          focus: "Foundation & Profile Setup",
+          tasks: [
+            "Rewrite your LinkedIn headline using the recommended developer structure.",
+            "Update your About section to highlight the multiplayer board game engine project.",
+            "Add GitHub links and live demos to your Featured section."
+          ]
+        },
+        {
+          week_label: "Week 2",
+          focus: "Commenting & Outbound Launch",
+          tasks: [
+            "Identify and follow 5 large technical creators to target for engagement.",
+            "Write at least 3 high-value comments daily using the micro-lesson approach.",
+            "Send 50 personalized connection requests to 2nd-degree developer networks."
+          ]
+        },
+        {
+          week_label: "Week 3",
+          focus: "Content Kickoff",
+          tasks: [
+            "Publish your first 'Lesson Learned from a Debugging Fail' story post.",
+            "Continue daily outbound connection requests (20/day).",
+            "Engage with peer creators who are building active projects."
+          ]
+        },
+        {
+          week_label: "Week 4",
+          focus: "Scale & Consistency",
+          tasks: [
+            "Create and publish a gRPC vs REST visual carousel post.",
+            "Analyze which of your posts had the highest scroll-stop engagement.",
+            "Ensure you reach your target of +180 connections this week."
+          ]
+        }
+      ]
+    });
+  }
+
+  try {
+    const userPrompt = `Baseline metrics: Current Followers = ${followers}, Current Connections = ${connections}\n\nDiagnostic Q&A:\n${qaPairs.map(p => `Q: ${p.question}\nA: ${p.answer}`).join('\n')}`;
+    const result = await queryGemini(GROWTH_STRATEGY_SYSTEM_PROMPT, userPrompt, GROWTH_STRATEGY_RESPONSE_SCHEMA);
+    res.json(result);
+  } catch (error) {
+    console.error('Error in /api/linkedin/growth/strategy:', error);
+    res.status(500).json({ error: 'Failed to generate growth strategy using Gemini API', details: error.message });
   }
 });
 

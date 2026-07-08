@@ -1,5 +1,5 @@
 /**
- * CareerShield AI — Dashboard Manager
+ * aegisresil-apex — Dashboard Manager
  * Manages statistics, history listing, and Chart.js integrations.
  */
 

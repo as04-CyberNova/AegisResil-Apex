@@ -1,5 +1,5 @@
 /**
- * CareerShield AI — App Coordinator & Router
+ * aegisresil-apex — App Coordinator & Router
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -51,6 +51,10 @@ document.addEventListener('DOMContentLoaded', () => {
     linkedin: {
       title: 'LinkedIn <em>Intelligence Suite</em>',
       desc: 'Eight original AI tools to supercharge your LinkedIn presence — from voice analysis to scam detection.'
+    },
+    jobfinder: {
+      title: 'Job Openings <em>Finder</em>',
+      desc: 'Instantly find and match the best current roles matching your requirements.'
     }
   };
 
@@ -403,31 +407,36 @@ document.addEventListener('DOMContentLoaded', () => {
   // Interview Prep views sub-tab triggers
   const subtabSandbox = document.getElementById('subtab-btn-sandbox');
   const subtabSimulator = document.getElementById('subtab-btn-simulator');
+  const subtabHrSimulator = document.getElementById('subtab-btn-hr-simulator');
   const panelSandbox = document.getElementById('interview-sandbox-panel');
   const panelSimulator = document.getElementById('interview-simulator-panel');
+  const panelHrSimulator = document.getElementById('interview-hr-simulator-panel');
 
-  if (subtabSandbox && subtabSimulator && panelSandbox && panelSimulator) {
+  if (subtabSandbox && subtabSimulator && subtabHrSimulator) {
+    const deactivateAllSubtabs = () => {
+      [subtabSandbox, subtabSimulator, subtabHrSimulator].forEach(btn => {
+        btn.classList.remove('active');
+        btn.style.color = 'var(--text-secondary)';
+        btn.style.borderBottom = 'none';
+      });
+      [panelSandbox, panelSimulator, panelHrSimulator].forEach(panel => {
+        if (panel) panel.style.display = 'none';
+      });
+    };
+
     subtabSandbox.addEventListener('click', () => {
+      deactivateAllSubtabs();
       subtabSandbox.classList.add('active');
       subtabSandbox.style.color = 'var(--primary)';
       subtabSandbox.style.borderBottom = '2px solid var(--primary)';
-      subtabSimulator.classList.remove('active');
-      subtabSimulator.style.color = 'var(--text-secondary)';
-      subtabSimulator.style.borderBottom = 'none';
-      
       panelSandbox.style.display = 'block';
-      panelSimulator.style.display = 'none';
     });
 
     subtabSimulator.addEventListener('click', () => {
+      deactivateAllSubtabs();
       subtabSimulator.classList.add('active');
       subtabSimulator.style.color = 'var(--primary)';
       subtabSimulator.style.borderBottom = '2px solid var(--primary)';
-      subtabSandbox.classList.remove('active');
-      subtabSandbox.style.color = 'var(--text-secondary)';
-      subtabSandbox.style.borderBottom = 'none';
-      
-      panelSandbox.style.display = 'none';
       panelSimulator.style.display = 'block';
 
       // Prefill simulator config inputs if values are present in Sandbox
@@ -438,12 +447,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (sandboxRole && simRole && !simRole.value) {
         simRole.value = sandboxRole;
-        // Trigger verification checking
         simRole.dispatchEvent(new Event('input'));
       }
       if (sandboxDesc && simDesc && !simDesc.value) {
         simDesc.value = sandboxDesc;
       }
+    });
+
+    subtabHrSimulator.addEventListener('click', () => {
+      deactivateAllSubtabs();
+      subtabHrSimulator.classList.add('active');
+      subtabHrSimulator.style.color = 'var(--primary)';
+      subtabHrSimulator.style.borderBottom = '2px solid var(--primary)';
+      panelHrSimulator.style.display = 'block';
     });
   }
 

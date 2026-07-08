@@ -1,5 +1,5 @@
 /**
- * CareerShield AI — LinkedIn Profile Optimizer Handler
+ * aegisresil-apex — LinkedIn Profile Optimizer Handler
  */
 
 document.addEventListener('DOMContentLoaded', () => {

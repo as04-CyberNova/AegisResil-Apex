@@ -1,5 +1,5 @@
 /**
- * CareerShield AI — LinkedIn Intelligence Suite
+ * aegisresil-apex — LinkedIn Intelligence Suite
  * 8 original tools for LinkedIn profile, content & safety
  */
 
@@ -519,8 +519,171 @@ document.addEventListener('DOMContentLoaded', () => {
     initCommentIntel();
     initContentRunway();
     initBioStoryBuilder();
+    initGrowthStrategist();
 
     switchLinkedInSubTab('brand-voice');
   };
+
+  function initGrowthStrategist() {
+    const step1 = document.getElementById('lg-step1');
+    const step2 = document.getElementById('lg-step2');
+    const step3 = document.getElementById('lg-step3');
+    const loadingQuestions = document.getElementById('lg-loading-questions');
+    const loadingStrategy = document.getElementById('lg-loading-strategy');
+    
+    const btnGetQuestions = document.getElementById('btn-lg-get-questions');
+    const btnGetStrategy = document.getElementById('btn-lg-get-strategy');
+    const btnBackToStep1 = document.getElementById('btn-lg-back-to-step1');
+    const btnReset = document.getElementById('btn-lg-reset');
+    
+    const inputFollowers = document.getElementById('lg-followers');
+    const inputConnections = document.getElementById('lg-connections');
+    const questionsContainer = document.getElementById('lg-questions-container');
+
+    let currentQuestions = [];
+
+    if (!btnGetQuestions) return;
+
+    // Step 1 -> Step 2
+    btnGetQuestions.addEventListener('click', async () => {
+      const followers = parseInt(inputFollowers.value) || 0;
+      const connections = parseInt(inputConnections.value) || 0;
+      
+      step1.style.display = 'none';
+      loadingQuestions.style.display = 'flex';
+
+      try {
+        const res = await fetch('/api/linkedin/growth/questions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ followers, connections })
+        });
+        const data = await res.json();
+        
+        currentQuestions = data.questions || [];
+        renderQuestions(currentQuestions);
+        
+        loadingQuestions.style.display = 'none';
+        step2.style.display = 'block';
+      } catch (err) {
+        alert('Failed to generate diagnostic questions. Please try again.');
+        loadingQuestions.style.display = 'none';
+        step1.style.display = 'block';
+      }
+    });
+
+    // Step 2 Back -> Step 1
+    btnBackToStep1.addEventListener('click', () => {
+      step2.style.display = 'none';
+      step1.style.display = 'block';
+    });
+
+    // Step 2 -> Step 3
+    btnGetStrategy.addEventListener('click', async () => {
+      const followers = parseInt(inputFollowers.value) || 0;
+      const connections = parseInt(inputConnections.value) || 0;
+      
+      const answers = [];
+      const textareas = questionsContainer.querySelectorAll('textarea');
+      let allAnswered = true;
+      
+      textareas.forEach((ta, index) => {
+        const val = ta.value.trim();
+        if (!val) {
+          allAnswered = false;
+          ta.style.borderColor = 'var(--color-danger)';
+        } else {
+          ta.style.borderColor = 'var(--border-light)';
+        }
+        answers.push({
+          question: currentQuestions[index],
+          answer: val
+        });
+      });
+
+      if (!allAnswered) {
+        alert('Please answer all questions so we can generate a tailored strategy.');
+        return;
+      }
+
+      step2.style.display = 'none';
+      loadingStrategy.style.display = 'flex';
+
+      try {
+        const res = await fetch('/api/linkedin/growth/strategy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ followers, connections, qaPairs: answers })
+        });
+        const data = await res.json();
+        
+        renderStrategy(data);
+        
+        loadingStrategy.style.display = 'none';
+        step3.style.display = 'block';
+      } catch (err) {
+        alert('Failed to generate strategy. Please try again.');
+        loadingStrategy.style.display = 'none';
+        step2.style.display = 'block';
+      }
+    });
+
+    // Reset Strategy
+    btnReset.addEventListener('click', () => {
+      step3.style.display = 'none';
+      inputFollowers.value = '1146';
+      inputConnections.value = '1107';
+      questionsContainer.innerHTML = '';
+      step1.style.display = 'block';
+    });
+
+    function renderQuestions(questions) {
+      questionsContainer.innerHTML = questions.map((q, idx) => `
+        <div class="form-group">
+          <label class="form-label" style="font-weight:600; line-height:1.4;">${idx + 1}. ${q}</label>
+          <textarea class="textarea-input" rows="3" placeholder="Type your answer here..." style="min-height:auto;"></textarea>
+        </div>
+      `).join('');
+    }
+
+    function renderStrategy(data) {
+      document.getElementById('lg-weekly-growth').textContent = data.estimated_weekly_growth;
+      
+      // Pillar 1: Profile Optimization
+      document.getElementById('lg-profile-headline').textContent = data.profile_optimization.headline_rewrite;
+      document.getElementById('lg-profile-about').textContent = data.profile_optimization.about_rewrite;
+      document.getElementById('lg-profile-featured').textContent = data.profile_optimization.featured_format;
+      document.getElementById('lg-profile-rationale').textContent = data.profile_optimization.strategy_rationale;
+
+      // Pillar 2: Outbound
+      document.getElementById('lg-outbound-weekly').textContent = data.outbound_strategy.weekly_system;
+      document.getElementById('lg-outbound-criteria').textContent = data.outbound_strategy.target_criteria;
+      document.getElementById('lg-outbound-template').textContent = data.outbound_strategy.connection_template;
+
+      // Pillar 3: Commenting
+      document.getElementById('lg-commenting-routine').textContent = data.commenting_framework.daily_routine;
+      document.getElementById('lg-commenting-creators').textContent = data.commenting_framework.creators_to_target;
+      document.getElementById('lg-commenting-approach').textContent = data.commenting_framework.example_comment_approach;
+
+      // Pillar 4: Content
+      document.getElementById('lg-content-plan').textContent = data.content_blueprint.weekly_posting_plan;
+      document.getElementById('lg-content-themes').innerHTML = data.content_blueprint.content_themes.map(t => `<li>${t}</li>`).join('');
+      document.getElementById('lg-content-templates').innerHTML = data.content_blueprint.templates_and_formats.map(tf => `
+        <div style="padding:0.75rem; background:rgba(255,255,255,0.02); border-radius:8px; border:1px solid var(--border-light);">
+          <p style="margin:0; font-size:0.88rem; line-height:1.4; color:var(--text-primary);">${tf}</p>
+        </div>
+      `).join('');
+
+      // Checklist Roadmap
+      document.getElementById('lg-weekly-roadmap').innerHTML = data.weekly_checklist.map(week => `
+        <div style="padding:1rem; background:rgba(15,23,42,0.6); border-radius:8px; border:1px solid var(--border-light);">
+          <h5 style="margin:0 0 0.5rem; font-size:1rem; font-weight:700; color:#8b5cf6;">${week.week_label} — ${week.focus}</h5>
+          <ul style="margin:0; padding-left:1.25rem; font-size:0.88rem; color:var(--text-secondary); display:flex; flex-direction:column; gap:0.35rem; line-height:1.4;">
+            ${week.tasks.map(t => `<li>${t}</li>`).join('')}
+          </ul>
+        </div>
+      `).join('');
+    }
+  }
 
 });

@@ -1,5 +1,5 @@
 /**
- * CareerShield AI — Scam/Fraud Message Analyzer Handler
+ * aegisresil-apex — Scam/Fraud Message Analyzer Handler
  */
 
 document.addEventListener('DOMContentLoaded', () => {
