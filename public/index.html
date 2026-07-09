@@ -254,9 +254,7 @@
         </h4>
         <select id="theme-selector" class="textarea-input" style="min-height: auto; padding: 0.45rem 0.75rem; font-size: 0.82rem; background: rgba(15,23,42,0.6); color: var(--text-primary); border-radius: 8px; width: 100%; border: 1px solid var(--border-light); cursor: pointer;">
           <option value="dark">Default (Dark)</option>
-          <option value="light">Current (Light)</option>
-          <option value="rainbow-dark">Rainbow (Dark)</option>
-          <option value="rainbow-light">Rainbow (Light)</option>
+          <option value="light">Default (Light)</option>
         </select>
       </div>
 
@@ -2482,6 +2480,13 @@
   </script>
 
   <!-- Load Custom Scripts -->
+  <!-- Sprint 3: Edge Infrastructure (load first — consumed by all modules) -->
+  <script src="js/edge-session.js"></script>
+  <script src="js/connectivity-guard.js"></script>
+  <!-- Sprint 1A / 2A / 2B: Global Feature Modules -->
+  <script src="js/region-config.js"></script>
+  <script src="js/channel-normalizer.js"></script>
+  <script src="js/registry-client.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/dashboard.js"></script>
   <script src="js/analyzer.js"></script>

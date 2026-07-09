@@ -42,6 +42,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const rawText = textInput.value.trim();
     if (rawText.length < 10) return;
 
+    // --- Run multi-channel normalizer before sending ---
+    let textToSend = rawText;
+    let detectedChannel = 'Unknown';
+    if (window.ChannelNormalizer) {
+      const normalized = window.ChannelNormalizer.process(rawText);
+      textToSend = normalized.annotatedText; // Annotated text with [SOURCE_CHANNEL: X] prefix
+      detectedChannel = normalized.channelLabel;
+    }
+
     // Toggle loading UI states
     textInput.disabled = true;
     btnAnalyze.disabled = true;
@@ -56,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ text: rawText })
+        body: JSON.stringify({ text: textToSend })
       });
 
       if (!response.ok) {
@@ -96,6 +105,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const level = (result.risk_level || 'LOW').toUpperCase();
     const flags = result.red_flags || [];
     const recommendation = result.recommendation || 'No specific recommendations provided.';
+    const sourceChannel = result.source_channel || 'Unknown';
+    const scamType = result.international_scam_type || '';
 
     // 1. Update text fields
     scoreNum.textContent = score;
@@ -104,8 +115,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. Animate SVG circular gauge
     const strokeOffset = GAUGE_CIRCUMFERENCE - (GAUGE_CIRCUMFERENCE * score) / 100;
-    
-    // Set strokeOffset, wait a frame to trigger transition
     requestAnimationFrame(() => {
       gaugeFill.style.strokeDashoffset = strokeOffset;
     });
@@ -120,7 +129,37 @@ document.addEventListener('DOMContentLoaded', () => {
       flagsList.innerHTML = flags.map(flag => `<li>${escapeHtml(flag)}</li>`).join('');
     }
 
-    // 5. Unhide Results Grid
+    // 5. Render source channel badge
+    let channelBadge = document.getElementById('scam-channel-badge');
+    if (!channelBadge) {
+      channelBadge = document.createElement('div');
+      channelBadge.id = 'scam-channel-badge';
+      channelBadge.style.cssText = `
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.5rem;
+      `;
+      // Insert above the flags list
+      flagsList.parentNode.insertBefore(channelBadge, flagsList);
+    }
+
+    const channelColor = ['WhatsApp','Telegram'].includes(sourceChannel) ? '#ef4444'
+      : ['Discord','SMS'].includes(sourceChannel) ? '#f59e0b'
+      : '#6b7280';
+
+    channelBadge.innerHTML = `
+      <span style="display:inline-flex; align-items:center; gap:0.35rem; background:rgba(255,255,255,0.04); border:1px solid ${channelColor}44; color:${channelColor}; border-radius:6px; padding:0.28rem 0.65rem; font-size:0.75rem; font-weight:600;">
+        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        ${escapeHtml(sourceChannel)}
+      </span>
+      ${scamType ? `<span style="display:inline-flex; align-items:center; gap:0.35rem; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.3); color:#fca5a5; border-radius:6px; padding:0.28rem 0.65rem; font-size:0.72rem; font-weight:600;">
+        ⚠️ ${escapeHtml(scamType.replace(/_/g, ' '))}
+      </span>` : ''}
+    `;
+
+    // 6. Unhide Results Grid
     resultsSection.style.display = 'grid';
   }
 

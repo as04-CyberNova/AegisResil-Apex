@@ -544,5 +544,13 @@ document.addEventListener('DOMContentLoaded', () => {
   checkServerStatus();
   initFirebase();
   switchTab('dashboard'); // Start on Dashboard
+
+  // --- Global Infrastructure: Edge Session + Connectivity Guard ---
+  if (window.EdgeSession) {
+    window.EdgeSession.init().catch(e => console.warn('[App] EdgeSession init failed:', e));
+  }
+  if (window.ConnectivityGuard) {
+    window.ConnectivityGuard.init().catch(e => console.warn('[App] ConnectivityGuard init failed:', e));
+  }
 });
 

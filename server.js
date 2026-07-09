@@ -1,12 +1,14 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import https from 'node:https';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import {
   SCAM_ANALYZER_SYSTEM_PROMPT,
   SCAM_RESPONSE_SCHEMA,
   RESUME_SCORER_SYSTEM_PROMPT,
   RESUME_RESPONSE_SCHEMA,
+  buildResumeScorerPrompt,
   COMPANY_TRUST_SYSTEM_PROMPT,
   COMPANY_TRUST_RESPONSE_SCHEMA,
   CAREER_ROADMAP_SYSTEM_PROMPT,
@@ -115,6 +117,98 @@ async function queryGemini(systemPrompt, userPrompt, responseSchema) {
 }
 
 /**
+ * Helper: Companies House (UK) live company lookup.
+ * Uses HTTP Basic Auth — API key as username, blank password.
+ * @param {string} companyName
+ * @returns {Promise<{ verified: boolean, companyNumber: string|null, status: string|null, companyType: string|null, dateOfCreation: string|null, error: string|null }>}
+ */
+function companiesHouseLookup(companyName) {
+  return new Promise((resolve) => {
+    const apiKey = process.env.COMPANIES_HOUSE_API_KEY;
+    if (!apiKey || apiKey === 'YOUR_COMPANIES_HOUSE_KEY_HERE') {
+      return resolve({ verified: false, error: 'Companies House API key not configured' });
+    }
+
+    const encodedName = encodeURIComponent(companyName.trim());
+    const options = {
+      hostname: 'api.company-information.service.gov.uk',
+      path: `/search/companies?q=${encodedName}&items_per_page=5`,
+      method: 'GET',
+      // Basic Auth: API key as username, empty password
+      headers: {
+        'Authorization': 'Basic ' + Buffer.from(`${apiKey}:`).toString('base64'),
+        'Accept': 'application/json',
+      },
+      timeout: 6000,
+    };
+
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(data);
+          const items = parsed.items || [];
+
+          if (items.length === 0) {
+            return resolve({
+              verified: false,
+              companyNumber: null,
+              status: null,
+              companyType: null,
+              dateOfCreation: null,
+              error: 'No matching entity found in Companies House registry',
+            });
+          }
+
+          // Take the first (most relevant) result
+          const top = items[0];
+          resolve({
+            verified: true,
+            companyNumber: top.company_number || null,
+            status: top.company_status || null,
+            companyType: top.company_type || null,
+            dateOfCreation: top.date_of_creation || null,
+            address: top.registered_office_address
+              ? `${top.registered_office_address.address_line_1 || ''}, ${top.registered_office_address.postal_code || ''}`.trim()
+              : null,
+            error: null,
+          });
+        } catch (e) {
+          resolve({ verified: false, error: 'Failed to parse Companies House response' });
+        }
+      });
+    });
+
+    req.on('timeout', () => {
+      req.destroy();
+      resolve({ verified: false, error: 'Companies House API request timed out' });
+    });
+
+    req.on('error', (e) => {
+      resolve({ verified: false, error: `Companies House API error: ${e.message}` });
+    });
+
+    req.end();
+  });
+}
+
+/**
+ * Adds standard edge-compatible headers to API responses.
+ * Makes routes deployable to Cloudflare Workers / Vercel Edge.
+ * @param {object} res - Express response object
+ * @param {string} [region] - Optional region code to echo in X-Region header
+ */
+function setEdgeHeaders(res, region) {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+  res.set('Vary', 'Accept-Encoding, Accept-Language');
+  res.set('X-Content-Type-Options', 'nosniff');
+  if (region) {
+    res.set('X-Region', region.toUpperCase());
+  }
+}
+
+/**
  * Route: Scam / Message Analyzer
  */
 app.post('/api/analyze-scam', async (req, res) => {
@@ -124,23 +218,36 @@ app.post('/api/analyze-scam', async (req, res) => {
     return res.status(400).json({ error: 'Text input is required' });
   }
 
+  setEdgeHeaders(res);
+
   // --- DEMO MODE FALLBACK ---
   if (!hasApiKey) {
     const textLower = text.toLowerCase();
     let risk_score = 15;
     let risk_level = 'LOW';
     let red_flags = [];
+    let source_channel = 'Unknown';
+    let international_scam_type = '';
     let recommendation = 'This message appears typical. However, always verify recruiter identities and cross-reference jobs on company sites before sharing sensitive information.';
+
+    // Channel detection hints
+    if (textLower.includes('[source_channel: whatsapp]') || textLower.includes('whatsapp')) source_channel = 'WhatsApp';
+    else if (textLower.includes('[source_channel: telegram]') || textLower.includes('telegram') || textLower.includes('t.me/')) source_channel = 'Telegram';
+    else if (textLower.includes('[source_channel: discord]')) source_channel = 'Discord';
+    else if (textLower.includes('[source_channel: sms]')) source_channel = 'SMS';
+    else if (textLower.includes('@')) source_channel = 'Email';
 
     if (textLower.includes('telegram') || textLower.includes('whatsapp') || textLower.includes('signal') || textLower.includes('chat') || textLower.includes('crypto')) {
       risk_score = 85;
       risk_level = 'HIGH';
+      international_scam_type = textLower.includes('crypto') ? 'CRYPTO_PAYOUT_SCAM' : '';
       red_flags.push('Urgent communication requested via encrypted messaging apps (Telegram/WhatsApp)');
       red_flags.push('Lack of official recruiter email matching the company domain');
       recommendation = 'DO NOT proceed. Real companies rarely conduct recruitment or extend offers exclusively over Telegram or WhatsApp. Block the sender and report the listing.';
     } else if (textLower.includes('fee') || textLower.includes('payment') || textLower.includes('training cost') || textLower.includes('upfront') || textLower.includes('check')) {
       risk_score = 95;
       risk_level = 'HIGH';
+      international_scam_type = 'FAKE_TRAINING_FEE';
       red_flags.push('Requires payment or check deposit for training, software, or office supplies');
       recommendation = 'CRITICAL DANGER. Legitimate employers will never ask you to pay for equipment or training, nor will they send you a check to buy tools. Immediately cut contact.';
     } else if (textLower.includes('urgent') || textLower.includes('immediate start') || textLower.includes('no experience') || textLower.includes('great pay')) {
@@ -155,6 +262,8 @@ app.post('/api/analyze-scam', async (req, res) => {
       isDemo: true,
       risk_score,
       risk_level,
+      source_channel,
+      international_scam_type,
       red_flags,
       recommendation
     });
@@ -177,18 +286,24 @@ app.post('/api/analyze-scam', async (req, res) => {
  * Route: Resume Scorer
  */
 app.post('/api/score-resume', async (req, res) => {
-  const { text } = req.body;
+  const { text, region = 'US' } = req.body;
 
   if (!text || text.trim() === '') {
     return res.status(400).json({ error: 'Resume text content is required' });
   }
+
+  // Validate region — fallback to US if unsupported value provided
+  const validRegions = ['US', 'UK', 'DE', 'IN'];
+  const resolvedRegion = validRegions.includes(region?.toUpperCase()) ? region.toUpperCase() : 'US';
+
+  setEdgeHeaders(res, resolvedRegion);
 
   // --- DEMO MODE FALLBACK ---
   if (!hasApiKey) {
     const textLower = text.toLowerCase();
     let overall_score = 65;
     let ats_compatibility_notes = [
-      'Demo Mode warning: This is simulated feedback based on text length.',
+      `Demo Mode: Simulated ${resolvedRegion} region feedback based on text length.`,
     ];
     let missing_keywords = ['CI/CD', 'Unit Testing', 'System Design'];
     let suggestions = [
@@ -196,6 +311,23 @@ app.post('/api/score-resume', async (req, res) => {
       'Optimize layout: Standardize section headings (e.g. "Work Experience", "Education") to ensure ease of parsing.',
       'Add a summary: Insert a short profile summary at the top outlining your technical focus.'
     ];
+    let compliance_violations = [];
+    let regional_notes = [];
+
+    // Region-specific demo hints
+    if (resolvedRegion === 'DE') {
+      compliance_violations.push('MISSING: Professional Bewerbungsfoto required for DACH market applications');
+      compliance_violations.push('CEFR CHECK: Verify all language proficiencies use A1-C2 CEFR scale labels');
+      regional_notes.push('German Lebenslauf format detected. Strict chronological order and exact month/year dates are expected.');
+    } else if (resolvedRegion === 'UK') {
+      regional_notes.push('UK CV standard: 2-page A4 format is expected. A Personal Profile at the top is strongly recommended.');
+    } else if (resolvedRegion === 'US') {
+      if (text.toLowerCase().includes('photo') || text.toLowerCase().includes('dob') || text.toLowerCase().includes('marital')) {
+        compliance_violations.push('HIGH_RISK: Personal information (photo/DOB/marital status) detected — EEO Compliance Violation');
+      }
+    } else if (resolvedRegion === 'IN') {
+      regional_notes.push('Indian market: Education and Projects sections carry significant weight for entry-level candidates.');
+    }
 
     if (text.length > 2000) {
       overall_score = 82;
@@ -209,17 +341,22 @@ app.post('/api/score-resume', async (req, res) => {
 
     return res.json({
       isDemo: true,
+      region: resolvedRegion,
       overall_score,
       ats_compatibility_notes,
       missing_keywords,
-      suggestions
+      suggestions,
+      compliance_violations,
+      regional_notes,
     });
   }
   // --------------------------
 
   try {
-    const result = await queryGemini(RESUME_SCORER_SYSTEM_PROMPT, text, RESUME_RESPONSE_SCHEMA);
-    res.json(result);
+    // Build dynamic region-specific prompt via factory function
+    const regionPrompt = buildResumeScorerPrompt(resolvedRegion);
+    const result = await queryGemini(regionPrompt, text, RESUME_RESPONSE_SCHEMA);
+    res.json({ ...result, region: resolvedRegion });
   } catch (error) {
     console.error('Error in /api/score-resume:', error);
     res.status(500).json({
@@ -233,33 +370,111 @@ app.post('/api/score-resume', async (req, res) => {
  * Route: Company Trust Analyzer (Feature 3)
  */
 app.post('/api/analyze-company', async (req, res) => {
-  const { companyName, websiteUrl, jobText } = req.body;
+  const { companyName, websiteUrl, jobText, jurisdiction } = req.body;
 
   if (!companyName || companyName.trim() === '') {
     return res.status(400).json({ error: 'Company name is required' });
   }
 
+  setEdgeHeaders(res);
+
+  // --- COMPANIES HOUSE LIVE REGISTRY LOOKUP (UK jurisdiction) ---
+  let registryData = null;
+  let registrySource = 'AI Reasoning (No Registry Available)';
+  let registryVerified = false;
+
+  const isUkJurisdiction = jurisdiction === 'UK' ||
+    (websiteUrl && (websiteUrl.includes('.co.uk') || websiteUrl.includes('.org.uk') || websiteUrl.includes('.uk'))) ||
+    /\b(ltd|limited|plc|llp|cic)\b/i.test(companyName);
+
+  if (isUkJurisdiction) {
+    try {
+      console.log(`[Registry] Running Companies House lookup for: "${companyName}"`);
+      const chResult = await companiesHouseLookup(companyName);
+
+      if (chResult.verified) {
+        registryVerified = true;
+        registrySource = 'UK Companies House (Live API)';
+        registryData = {
+          companyNumber: chResult.companyNumber,
+          status: chResult.status,
+          companyType: chResult.companyType,
+          dateOfCreation: chResult.dateOfCreation,
+          registeredAddress: chResult.address,
+        };
+        console.log(`[Registry] ✅ Verified: ${companyName} — CH# ${chResult.companyNumber}, Status: ${chResult.status}`);
+      } else {
+        registrySource = 'UK Companies House (Live API — Not Found)';
+        console.warn(`[Registry] ❌ Not found in Companies House: ${companyName}. Reason: ${chResult.error}`);
+      }
+    } catch (err) {
+      console.error('[Registry] Companies House lookup error:', err.message);
+      registrySource = 'UK Companies House (API Error — Fallback Mode)';
+    }
+  }
+
+  // Build the user prompt with registry grounding facts injected
+  const registryBlock = registryVerified
+    ? `
+## REGISTRY VERIFICATION RESULT — UK Companies House (LIVE DATA)
+- Status: VERIFIED ✅
+- Company Number: ${registryData.companyNumber}
+- Company Status: ${registryData.status}
+- Company Type: ${registryData.companyType}
+- Date of Creation: ${registryData.dateOfCreation}
+- Registered Address: ${registryData.registeredAddress || 'Not available'}
+Use this as strong positive grounding evidence. A verified Companies House entry is a significant legitimacy signal.
+`
+    : isUkJurisdiction
+    ? `
+## REGISTRY VERIFICATION RESULT — UK Companies House (LIVE DATA)
+- Status: NOT FOUND ❌
+- No matching entity was found in the official UK Companies House register for this company name.
+- This is a HIGH RISK signal. Legitimate UK-registered companies MUST appear in Companies House.
+- MANDATORY: Add "HIGH_RISK: Company not found in UK Companies House official registry" to caveats.
+- MANDATORY: Cap trust_score at a maximum of 35.
+`
+    : '';
+
   const userPrompt = `
   Company Name: ${companyName}
   Website URL: ${websiteUrl || 'Not provided'}
   Job Description Text: ${jobText || 'Not provided'}
+  Detected Jurisdiction: ${jurisdiction || 'Unknown'}
+  ${registryBlock}
   `;
 
   // --- DEMO MODE FALLBACK ---
   if (!hasApiKey) {
     const nameLower = companyName.toLowerCase();
     const textLower = (jobText || '').toLowerCase();
-    let trust_score = 88;
+    let trust_score = isUkJurisdiction && !registryVerified ? 30 : 88;
     let confidence_level = 'MEDIUM';
     let signals_checked = ['Company name query', 'Common phishing naming formats'];
     let caveats = [
       'Demo Mode notice: This is simulated data.',
       'This is an AI evaluation, not an official registry/WHOIS verification. Manually verify via corporate registries, LinkedIn, or phone.'
     ];
-    let recommendation = 'This company name appears legitimate. Verify listings on LinkedIn or the official company careers page before submitting details.';
+    let recommendation = registryVerified
+      ? `Company verified in UK Companies House registry (No. ${registryData?.companyNumber}). Appears legitimate. Verify the specific job posting on the official careers page.`
+      : 'This company name appears legitimate. Verify listings on LinkedIn or the official company careers page before submitting details.';
+
+    if (isUkJurisdiction) {
+      signals_checked.push('UK Companies House registry lookup');
+      if (!registryVerified) {
+        caveats.push('HIGH_RISK: Company not found in UK Companies House official registry. UK companies are legally required to register.');
+        trust_score = 28;
+        confidence_level = 'HIGH';
+        recommendation = 'HIGH RISK: This entity cannot be verified in the UK Companies House official registry. Do not share personal data or apply until you can confirm legal registration.';
+      } else {
+        caveats.push(`Companies House verified. Company status: ${registryData?.status}. Always verify the specific job listing on the official company website.`);
+        trust_score = 82;
+        confidence_level = 'HIGH';
+      }
+    }
 
     if (nameLower.includes('virtual') || nameLower.includes('helper') || nameLower.includes('global pay') || nameLower.includes('easy income') || nameLower.includes('cash flow') || textLower.includes('telegram')) {
-      trust_score = 22;
+      trust_score = Math.min(trust_score, 22);
       confidence_level = 'MEDIUM';
       signals_checked.push('Scam keyword profile detection');
       caveats.push('The company name or associated job text matches common patterns used in remote hiring scams.');
@@ -274,7 +489,10 @@ app.post('/api/analyze-company', async (req, res) => {
       caveats,
       recommendation,
       search_grounded: false,
-      search_citations: []
+      search_citations: [],
+      registry_verified: registryVerified,
+      registry_source: registrySource,
+      registry_record: registryData,
     });
   }
   // --------------------------
@@ -319,15 +537,29 @@ app.post('/api/analyze-company', async (req, res) => {
       return res.json({
         ...fallbackResult,
         search_grounded: false,
-        search_citations: []
+        search_citations: [],
+        registry_verified: registryVerified,
+        registry_source: registrySource,
+        registry_record: registryData,
       });
     }
 
     const parsed = JSON.parse(responseText);
+
+    // Enforce trust_score cap if UK company NOT found in registry
+    if (isUkJurisdiction && !registryVerified && parsed.trust_score > 35) {
+      parsed.trust_score = 35;
+      parsed.caveats = parsed.caveats || [];
+      parsed.caveats.unshift('HIGH_RISK: Company not found in UK Companies House official registry. Trust score capped.');
+    }
+
     res.json({
       ...parsed,
       search_grounded: searchGrounded,
-      search_citations: searchCitations
+      search_citations: searchCitations,
+      registry_verified: registryVerified,
+      registry_source: registrySource,
+      registry_record: registryData,
     });
   } catch (error) {
     console.error('Error in /api/analyze-company:', error);
@@ -913,7 +1145,7 @@ app.post('/api/job-finder/search', async (req, res) => {
           location: "Vadodara, Gujarat (Hybrid)",
           salary: "₹7.0 - 9.0 LPA",
           date_posted: "3 days ago",
-          apply_link: "https://www.linkedin.com/jobs/view/hr-manager-technovus"
+          apply_link: "https://jobs.lever.co/technovus/hr-manager-340"
         },
         {
           title: "People Operations Generalist",
@@ -921,7 +1153,7 @@ app.post('/api/job-finder/search', async (req, res) => {
           location: "Vadodara, Gujarat",
           salary: "₹6.0 - 8.0 LPA",
           date_posted: "5 days ago",
-          apply_link: "https://www.naukri.com/job-listings-people-ops-mediaverse"
+          apply_link: "https://boards.greenhouse.io/mediaverse/jobs/482019"
         },
         {
           title: "Human Resources Lead",
@@ -929,7 +1161,7 @@ app.post('/api/job-finder/search', async (req, res) => {
           location: "Remote (India)",
           salary: "₹8.0 - 10.0 LPA",
           date_posted: "10 days ago",
-          apply_link: "https://www.cybernova.com/careers/hr-lead"
+          apply_link: "https://careers.cybernova.com/jobs/hr-lead-231"
         },
         {
           title: "Assistant HR Manager",
@@ -937,7 +1169,7 @@ app.post('/api/job-finder/search', async (req, res) => {
           location: "Vadodara, Gujarat",
           salary: "₹6.5 LPA",
           date_posted: "12 days ago",
-          apply_link: "https://www.indeed.com/jobs/view/assistant-hr-infrabuild"
+          apply_link: "https://careers.infrabuild.com/listings/assistant-hr-manager"
         },
         {
           title: "HR Generalist",
@@ -945,7 +1177,7 @@ app.post('/api/job-finder/search', async (req, res) => {
           location: "Vadodara, Gujarat",
           salary: "₹7.0 LPA",
           date_posted: "15 days ago",
-          apply_link: "https://www.apex.com/jobs/hr-generalist"
+          apply_link: "https://jobs.lever.co/apex-solutions/hr-generalist"
         },
         {
           title: "People Operations Manager",
@@ -953,7 +1185,7 @@ app.post('/api/job-finder/search', async (req, res) => {
           location: "Remote (India)",
           salary: "₹9.0 LPA",
           date_posted: "18 days ago",
-          apply_link: "https://www.linkedin.com/jobs/view/people-ops-flicker"
+          apply_link: "https://boards.greenhouse.io/flickermedia/jobs/59102"
         },
         {
           title: "Human Resources Manager",
@@ -961,7 +1193,7 @@ app.post('/api/job-finder/search', async (req, res) => {
           location: "Vadodara, Gujarat",
           salary: "₹8.5 LPA",
           date_posted: "20 days ago",
-          apply_link: "https://www.tcs.com/careers/hr-manager"
+          apply_link: "https://www.tcs.com/careers/india/hr-manager-positions"
         },
         {
           title: "HR Manager",
@@ -969,7 +1201,7 @@ app.post('/api/job-finder/search', async (req, res) => {
           location: "Vadodara, Gujarat",
           salary: "₹7.5 LPA",
           date_posted: "22 days ago",
-          apply_link: "https://www.indeed.com/jobs/view/hr-starhub"
+          apply_link: "https://careers.starhub.com/job/hr-manager-gujarat"
         },
         {
           title: "Talent Operations Lead",
@@ -977,7 +1209,7 @@ app.post('/api/job-finder/search', async (req, res) => {
           location: "Vadodara, Gujarat (Hybrid)",
           salary: "₹9.5 LPA",
           date_posted: "25 days ago",
-          apply_link: "https://careers.wipro.com/jobs/talent-ops"
+          apply_link: "https://careers.wipro.com/jobs/talent-operations-lead"
         },
         {
           title: "HR Executive (Generalist)",
@@ -985,7 +1217,7 @@ app.post('/api/job-finder/search', async (req, res) => {
           location: "Vadodara, Gujarat",
           salary: "₹6.0 LPA",
           date_posted: "28 days ago",
-          apply_link: "https://www.naukri.com/job-listings-hr-exec-lt"
+          apply_link: "https://careers.lntecc.com/jobs/hr-executive-generalist"
         }
       ],
       top_matches: [
@@ -1727,6 +1959,15 @@ app.post('/api/linkedin/growth/strategy', async (req, res) => {
     console.error('Error in /api/linkedin/growth/strategy:', error);
     res.status(500).json({ error: 'Failed to generate growth strategy using Gemini API', details: error.message });
   }
+});
+
+// Health-check endpoint — used by ConnectivityGuard for real connectivity probing
+// Responds to both GET (debug) and HEAD (lightweight probe) requests
+app.get('/api/status', (req, res) => {
+  res.json({ status: 'ok', timestamp: Date.now() });
+});
+app.head('/api/status', (req, res) => {
+  res.status(200).end();
 });
 
 // Start the server
